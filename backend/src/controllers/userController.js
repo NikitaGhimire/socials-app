@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Message = require('../models/Message');
 const FriendRequest = require('../models/FriendRequest');
 const jwt = require("jsonwebtoken");
+const { createNotification } = require("../controllers/notificationController");
 
 //generate jwt
 const generateToken = (id) => {
@@ -127,6 +128,14 @@ const sendFriendRequest = async (req, res) => {
       });
   
       await newRequest.save();
+
+      // Create a notification for the receiver
+      await createNotification({
+        userId: receiverId, // Receiver gets the notification
+        type: "friendRequest",
+        senderId: senderId,
+        message: `${req.user.name} has sent you a friend request`,
+      });
       res.status(200).json({ message: "Friend request sent successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -162,6 +171,14 @@ const sendFriendRequest = async (req, res) => {
   
       await sender.save();
       await receiver.save();
+
+      // Create a notification for the sender
+      await createNotification({
+        userId: senderId, // Sender gets the notification
+        type: "friendRequestAccepted",
+        senderId: receiverId,
+        message: `${receiver.name} has accepted your friend request!`,
+      });
   
       res.status(200).json({ message: "Friend request accepted" });
     } catch (error) {
@@ -188,6 +205,14 @@ const sendFriendRequest = async (req, res) => {
       // Update the status to "rejected"
       request.status = "rejected";
       await request.save();
+
+      // Create a notification for the sender
+      await createNotification({
+        userId: senderId, // Sender gets the notification
+        type: "friendRequestRejected",
+        senderId: receiverId,
+        message: `${receiver.name} has rejected your friend request.`,
+      });
   
       res.status(200).json({ message: "Friend request rejected" });
     } catch (error) {
@@ -238,6 +263,13 @@ const sendMessage = async (req, res) => {
     });
 
     await message.save();
+    // Create a notification for the receiver
+    await createNotification({
+      userId: receiverId, // Receiver gets the notification
+      type: "message",
+      senderId: senderId,
+      message: `${senderId.name} has sent you a new message`,
+    });
     res.status(200).json({ message: "Message sent successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
