@@ -1,26 +1,16 @@
-const express = require('express');
-const app = express();
-const port = 5000;
-const cors = require('cors');
+const app = require("./src/app");
+const http = require("http");
+const setupSocket = require("./src/config/socket");
 
-app.use(cors({
-    origin: "http://localhost:3000",
-}));
+// Create HTTP server
+const server = http.createServer(app);
 
-// Middleware to parse JSON
-app.use(express.json());
+// Setup Socket.IO
+const io = setupSocket(server);
 
-// Sample route
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
 
-// Another example route
-app.get('/api', (req, res) => {
-  res.json({ message: 'This is an API endpoint!' });
-});
-
-// Server listening
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
