@@ -1,4 +1,4 @@
-const app = require("./src/app");
+const app = require('./app');
 const http = require("http");
 const setupSocket = require("./src/config/socket");
 
