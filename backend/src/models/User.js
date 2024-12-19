@@ -10,6 +10,12 @@ const userSchema = new mongoose.Schema(
         statusMessage: { type: String, default: ""},
         bio: { type: String, default:""},
         online: {type: Boolean, default: false},
+        friends: [
+            {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "User",
+            },
+          ],
     },
     { timestamps: true}
 );
