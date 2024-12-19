@@ -66,4 +66,36 @@ const getUserProfile = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// Update user profile
+const updateUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.bio = req.body.bio || user.bio;
+            user.statusMessage = req.body.statusMessage || user.statusMessage;
+
+            // Check if a profile picture URL is provided
+            if (req.body.profilePicture) {
+                user.profilePicture = req.body.profilePicture;
+            }
+
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                bio: updatedUser.bio,
+                statusMessage: updatedUser.statusMessage,
+                profilePicture: updatedUser.profilePicture,
+            });
+        } else {
+            res.status(404).json({ message: "User not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile, updateUserProfile };
