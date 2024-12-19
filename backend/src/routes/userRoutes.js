@@ -8,6 +8,8 @@ const {
     acceptFriendRequest,
     rejectFriendRequest,
     listFriends,
+    sendMessage,
+    getMessages,
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -48,5 +50,13 @@ router.put("/reject", protect, rejectFriendRequest);
 
 // List all friends
 router.get("/friends", protect, listFriends);
+
+//MESSAGE MGMT
+
+// Send a message
+router.post("/sendMessage", protect, sendMessage);
+
+// Get messages between two users
+router.get("/messages/:userId", protect, getMessages);
 
 module.exports = router;
