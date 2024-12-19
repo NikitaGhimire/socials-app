@@ -14,6 +14,11 @@ app.use(cors({ origin: "http://localhost:3000" })); // Enable CORS for all reque
 app.use(express.json()); // Parse incoming JSON requests
 // Serve static files from the "src/uploads" folder
 app.use("/uploads", express.static(path.join(__dirname, "src", "uploads")));
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Something went wrong!" });
+});
+
 
 // Database connection
 connectDB(); // Connect to MongoDB
