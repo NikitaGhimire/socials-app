@@ -219,6 +219,23 @@ const sendFriendRequest = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };
+
+  const viewFriendRequest = async (req, res) => {
+    try {
+      const { userId } = req.query; // Get the user ID from query params or authentication middleware
+    
+      // Find all friend requests for the user (as sender or receiver)
+      const friendRequests = await FriendRequest.find({
+        $or: [{ sender: userId }, { receiver: userId }] // Check both sender and receiver
+      }).populate('sender', 'name email')  // Optionally, populate sender and receiver details
+        .populate('receiver', 'name email');
+      
+      res.status(200).json(friendRequests);
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+      res.status(500).json({ error: "Failed to fetch friend requests" });
+    }
+  };
   
   const listFriends = async (req, res) => {
     const userId = req.user.id;
@@ -305,6 +322,7 @@ module.exports = { registerUser,
                     sendFriendRequest, 
                     acceptFriendRequest, 
                     rejectFriendRequest, 
+                    viewFriendRequest,
                     listFriends,
                     sendMessage,
                     getMessages };

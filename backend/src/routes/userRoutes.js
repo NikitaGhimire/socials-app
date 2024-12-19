@@ -7,6 +7,7 @@ const {
     sendFriendRequest,
     acceptFriendRequest,
     rejectFriendRequest,
+    viewFriendRequest,
     listFriends,
     sendMessage,
     getMessages,
@@ -47,6 +48,9 @@ router.put("/accept", protect, acceptFriendRequest);
 
 // Reject a friend request
 router.put("/reject", protect, rejectFriendRequest);
+
+//view friend request
+router.get('/requests', protect, viewFriendRequest);
 
 // List all friends
 router.get("/friends", protect, listFriends);
