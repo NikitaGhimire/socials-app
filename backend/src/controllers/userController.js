@@ -103,7 +103,7 @@ const updateUserProfile = async (req, res) => {
 
 const sendFriendRequest = async (req, res) => {
     const senderId = req.user.id;
-    const receiverId = req.body.receiverId;
+    const { receiverId } = req.body;
   
     try {
       // Check if the sender and receiver are the same user
@@ -143,8 +143,8 @@ const sendFriendRequest = async (req, res) => {
   };
 
   const acceptFriendRequest = async (req, res) => {
-    const senderId = req.body.senderId;
     const receiverId = req.user.id;
+    const senderId = req.body.senderId;
   
     try {
       // Find the friend request
@@ -222,8 +222,7 @@ const sendFriendRequest = async (req, res) => {
 
   const viewFriendRequest = async (req, res) => {
     try {
-      const { userId } = req.query; // Get the user ID from query params or authentication middleware
-    
+      const { userId } = req.query;// Get the user ID from query params or authentication middleware
       // Find all friend requests for the user (as sender or receiver)
       const friendRequests = await FriendRequest.find({
         $or: [{ sender: userId }, { receiver: userId }] // Check both sender and receiver
