@@ -14,12 +14,16 @@ const setupSocket = (server) => {
 
         // Handle incoming messages
         socket.on("sendMessage", ({ senderId, recipientId, message }) => {
-            // Emit the message to the recipient
-            io.to(recipientId).emit("receiveMessage", {
+            // Ensure receipientId exists before emitting
+            if(io.sockets.sockets.get(recipientId)) {
+                io.to(recipientId).emit("receiveMessage", {
                 senderId,
                 message,
                 timestamp: new Date()
-            });
+                });
+            } else {
+            console.log(`Recipient with ID ${recipientId} not connected`);
+            }
         });
 
         // Handle user disconnect
