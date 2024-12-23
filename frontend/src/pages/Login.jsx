@@ -15,6 +15,9 @@ const Login = () => {
         e.preventDefault();
         try {
             const { data } = await api.post("/users/login", { email, password });
+            // Save the token and user data to localStorage
+            localStorage.setItem("token", data.token);  // Save the token
+            localStorage.setItem("user", JSON.stringify(data));  // Save user data
             login(data); // Save user data in context
             navigate("/"); // Redirect to home/dashboard
         } catch (err) {
