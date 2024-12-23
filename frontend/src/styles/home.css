@@ -1,0 +1,300 @@
+/* General Layout */
+.home-container {
+    display: flex;
+    justify-content: space-evenly; /* Align items to the left */
+    align-items: flex-start; /* Align items to the top */
+    flex-direction: column; /* Place items in a row (horizontal layout) */
+    min-height: 100vh;
+    /* padding: 60px; */
+    position: absolute;
+    flex-grow: 1;
+    margin-left: 20px;
+}
+
+/* Profile Section */
+.profile-section {
+    position: relative; /* Position it relative to the home-container */
+    top: 20px; /* Adjust the distance from the top of the container */
+    left: 20px; /* Adjust the distance from the left of the container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.profile-picture {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.profile-details p {
+    margin: 5px 0;
+}
+
+.logout-button {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.logout-button:hover {
+    background-color: #ff1a1a;
+}
+
+/* Search, Message, and Friend Requests Section
+.sections-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    flex-grow: 1;
+    margin-left: 20px;
+    width: 100%;
+    padding: 20px;
+} */
+
+.search-section {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.search-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.search-input {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+}
+
+.search-button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #0056b3;
+}
+
+/* Send Message Section */
+.message-icon-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* .message-icon {
+    font-size: 30px;
+    padding: 5px 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 20%;
+    cursor: pointer;
+} */
+
+.inbox-icon {
+    display: flex;
+    width: 60px;
+    height: 60px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.message-icon:hover {
+    background-color: #218838;
+}
+
+.send-message-section {
+    display: flex;
+    flex-direction: column;
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+}
+
+.friend-select {
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.message-textarea {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    resize: none;
+    height: 100px;
+}
+
+.send-button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.send-button:hover {
+    background-color: #0056b3;
+}
+
+.request-icon{
+    display: flex;
+    width: 60px;
+    height: 60px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+
+.accept-button, .reject-button {
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.accept-button:hover {
+    background-color: #0056b3;
+}
+
+.reject-button {
+    background-color: #ff4d4d;
+}
+
+.reject-button:hover {
+    background-color: #ff1a1a;
+}
+
+.edit-profile-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.edit-profile-form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.edit-profile-form input,
+.edit-profile-form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.save-profile-button,
+.cancel-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.save-profile-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.save-profile-button:hover {
+    background-color: #0056b3;
+}
+
+.cancel-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #d32f2f;
+}
+
+.friends-section {
+    margin-top: 20px;
+}
+
+.friend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fefefe;
+}
+
+.friend-profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.friend-details {
+    flex-grow: 1;
+}
+
+.unfriend-button {
+    padding: 8px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.unfriend-button:hover {
+    background-color: #d32f2f;
+}
+
+.my-friends{
+    width: 70px;
+    height: 70px;
+    border-radius: 10%;
+    margin-left: 50px;
+}
+
