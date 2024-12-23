@@ -6,8 +6,8 @@ const userSchema = new mongoose.Schema(
         name: { type: String, required: true},
         email: { type: String, required: true, unique: true},
         password: {type: String, required: true},
-        profilePicture: { type: String, default: ""},
-        statusMessage: { type: String, default: ""},
+        profilePicture: { type: String, default: "./uploads/default.jpg"},
+        statusMessage: { type: String, default: "Busy"},
         bio: { type: String, default:""},
         online: {type: Boolean, default: false},
         friends: [
