@@ -3,7 +3,7 @@ const { Server } = require("socket.io");
 const setupSocket = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: "*", // Update with frontend URL in production
+            origin: "http://localhost:3000", // Update with frontend URL in production
             methods: ["GET", "POST"]
         }
     });
