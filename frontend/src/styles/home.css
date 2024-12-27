@@ -1,14 +1,14 @@
 /* General Layout */
 .home-container {
     display: flex;
-    justify-content: space-evenly; /* Align items to the left */
+    justify-content: space-between; /* Align items to the left */
     align-items: flex-start; /* Align items to the top */
-    flex-direction: column; /* Place items in a row (horizontal layout) */
+    flex-direction: row; /* Place items in a row (horizontal layout) */
     min-height: 100vh;
-    /* padding: 60px; */
-    position: absolute;
+    padding: 60px;
+    /* position: absolute; */
     flex-grow: 1;
-    margin-left: 20px;
+    margin-right: 100px;
 }
 
 /* Profile Section */
@@ -22,10 +22,19 @@
     cursor: pointer;
 }
 
+.profile-picture-icon{
+    width: 150px; /* Fixed width */
+    height: 150px; /* Fixed height to make it a square */
+    object-fit: cover; /* Ensures the image fills the box while maintaining its aspect ratio */
+    margin-bottom: 10px;
+    border: solid 2px black;
+    border-radius: 50%;
+}
+
 .profile-picture {
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: 60%;
     object-fit: cover;
     margin-bottom: 10px;
 }
@@ -37,7 +46,7 @@
     padding: 10px;
     background-color: #f4f4f4;
     border-radius: 8px;
-    margin-top: 10px;
+    margin: 80px;
 }
 
 .profile-details p {
@@ -58,31 +67,21 @@
     background-color: #ff1a1a;
 }
 
-/* Search, Message, and Friend Requests Section
+/* Search, Message, and Friend Requests Section */
 .sections-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: flex-start;
-    flex-grow: 1;
-    margin-left: 20px;
-    width: 100%;
-    padding: 20px;
-} */
-
-.search-section {
+    position: relative;
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    justify-content: space-evenly;
+    flex-grow: 1;
+    width: 100%;
+    padding: 30px;
+    background-color: #ddd;
+    margin-left: 100px;
+    border-radius: 10px;
+    gap: 10px;
 }
 
-.search-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    align-items: center;
-}
 
 .search-input {
     padding: 8px;
@@ -105,32 +104,8 @@
     background-color: #0056b3;
 }
 
-/* Send Message Section */
-.message-icon-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-}
 
-/* .message-icon {
-    font-size: 30px;
-    padding: 5px 10px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 20%;
-    cursor: pointer;
-} */
 
-.inbox-icon {
-    display: flex;
-    width: 60px;
-    height: 60px;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-}
 
 .message-icon:hover {
     background-color: #218838;
@@ -174,14 +149,7 @@
     background-color: #0056b3;
 }
 
-.request-icon{
-    display: flex;
-    width: 60px;
-    height: 60px;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-}
+
 
 
 .accept-button, .reject-button {
@@ -253,10 +221,6 @@
     background-color: #d32f2f;
 }
 
-.friends-section {
-    margin-top: 20px;
-}
-
 .friend-item {
     display: flex;
     align-items: center;
@@ -291,10 +255,38 @@
     background-color: #d32f2f;
 }
 
-.my-friends{
-    width: 70px;
-    height: 70px;
-    border-radius: 10%;
-    margin-left: 50px;
+.my-friends {
+    display: flex;
+    width: 60px;
+    height: 60px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    
 }
 
+.request-icon{
+    display: flex;
+    width: 60px;
+    height: 60px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.inbox-icon {
+    display: flex;
+    width: 60px;
+    height: 60px;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.friends-section {
+    margin-left: 100px;
+    margin-top: 30px;
+    align-items: center;
+    margin-right: 20px;
+    
+}

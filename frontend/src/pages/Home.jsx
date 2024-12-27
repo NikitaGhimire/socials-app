@@ -116,23 +116,34 @@ const Home = () => {
         formData.append("bio", profileUpdates.bio || user.bio);
         formData.append("statusMessage", profileUpdates.statusMessage || user.statusMessage);
         if (profileUpdates.profilePicture) {
+            console.log("Profile picture file:", profileUpdates.profilePicture);
             formData.append("profilePicture", profileUpdates.profilePicture);
+        } else {
+            console.log("No profile picture selected for upload.");
         }
 
         try {
+            console.log("Sending formData to /users/update-profile...");
             const response = await api.put("/users/update-profile", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
             const updatedUser = response.data;
+            // Debug: Log the response from the server
+        console.log("Response from update-profile API:", updatedUser);
+            // Debug: Fetch the updated user profile from the backend
+        console.log("Fetching the updated user profile...");
+            await fetchUserProfile();
 
-            fetchUserProfile();
-
+            // Debug: Check what is being stored in localStorage
+        console.log("Storing updated user data in localStorage:", updatedUser);
             // Persist the updated user data in localStorage
             localStorage.setItem("user", JSON.stringify(updatedUser));
 
             alert("Profile updated successfully!");
             setEditingProfile(false);
+            // Debug: Check state after reset
+        console.log("Resetting profile updates state.");
             setProfileUpdates({ ...profileUpdates, profilePicture: null });
             // Update user state here instead of reloading the page
         } catch (err) {
@@ -281,17 +292,17 @@ const Home = () => {
                 <>
                     <div className="profile-section" onClick={handleProfileClick}>
                         <img 
-                            src={userProfile?.profilePicture ? `{userProfile.profilePicture}` : '/images/default.jpg'}
+                            src={userProfile?.profilePicture ? `http://localhost:5000${userProfile.profilePicture}` : '/images/default.jpg'}
                             alt={userProfile?.name || "User"} 
-                            className="profile-picture" 
+                            className="profile-picture-icon" 
                         />
                         {profileVisible && !editingProfile && (
                             <div className="profile-details">
-                                <img 
-                                    src={userProfile?.profilePicture ?`http://localhost:5000${user.profilePicture}` : '/images/default.jpg'} 
+                                {/* <img 
+                                    src={userProfile?.profilePicture ?`http://localhost:5000${userProfile.profilePicture}` : '/images/default.jpg'} 
                                     alt={userProfile?.name || "User"} 
                                     className="profile-picture" 
-                                />
+                                /> */}
                                 <p>Name: {userProfile?.name}</p>
                                 <p>Email: {userProfile?.email}</p>
                                 <p>Bio: {userProfile?.bio}</p>
@@ -359,38 +370,6 @@ const Home = () => {
                         )}
                     </div>
 
-                    <div className="friends-section" onClick={handleFriendsClick}>
-                        <img
-                        src='./images/friend.png'
-                        alt="Friends"
-                        className="my-friends"
-                        />
-                        {friendsVisible && (
-                            <div>
-                                {friends.length > 0 ? (
-                                    <ul>
-                                        {friends.map((friend) => (
-                                            <li key={friend._id} className="friend-item">
-                                                <img
-                                                    src={friend.profilePicture ? `http://localhost:5000${friend.profilePicture}` : '/images/default.jpg'}
-                                                    alt={friend.name}
-                                                    className="friend-profile-picture"
-                                                />
-                                                <div className="friend-details">
-                                                    <p> {friend.name} </p>
-                                                </div>
-                                                <button onClick={() => handleUnfriend(friend._id)} className="unfriend-button">
-                                                    Unfriend
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>You have no friends yet.</p>
-                                )}
-                            </div>
-                        )}
-                    </div>
 
                     <div className="sections-wrapper">
                             <div className="search-section">
@@ -506,7 +485,41 @@ const Home = () => {
                                 </div>
                             )}
                         </div>
+
+                        
                     </div>
+                    <div className="friends-section" onClick={handleFriendsClick}>
+                                <img
+                                src='./images/friend.png'
+                                alt="Friends"
+                                className="my-friends"
+                                />
+                                {friendsVisible && (
+                                    <div>
+                                        {friends.length > 0 ? (
+                                            <ul>
+                                                {friends.map((friend) => (
+                                                    <li key={friend._id} className="friend-item">
+                                                        <img
+                                                            src={friend.profilePicture ? `http://localhost:5000${friend.profilePicture}` : '/images/default.jpg'}
+                                                            alt={friend.name}
+                                                            className="friend-profile-picture"
+                                                        />
+                                                        <div className="friend-details">
+                                                            <p> {friend.name} </p>
+                                                        </div>
+                                                        <button onClick={() => handleUnfriend(friend._id)} className="unfriend-button">
+                                                            Unfriend
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p>You have no friends yet.</p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                 </>
             )}
         </div>

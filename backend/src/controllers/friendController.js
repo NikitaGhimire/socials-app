@@ -117,8 +117,6 @@ const sendFriendRequest = async (req, res) => {
       // const {userId} = req.query; 
       const userId = req.user.id;
   
-      console.log("Fetching friend requests for user:", userId);
-  
       // Find only friend requests where the user is the receiver
     const friendRequests = await FriendRequest.find({ receiver: userId, status: 'pending' }) 
     .populate('sender', 'name email')  // Populate sender details
