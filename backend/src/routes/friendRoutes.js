@@ -4,7 +4,9 @@ const {
     handleFriendRequest,
     viewFriendRequest, 
     listFriends,
-    unfriend, 
+    unfriend,
+    viewSentFriendRequests, 
+    deleteAllSentFriendRequests
 } = require("../controllers/friendController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -22,5 +24,8 @@ router.get("/requests", protect, viewFriendRequest);
 // List all friends
 router.get("/myfriends", protect, listFriends);
 router.post("/unfriend", protect, unfriend);
+router.get("/sentRequests", protect, viewSentFriendRequests);
+router.delete('/sent-requests', protect, deleteAllSentFriendRequests);
+
 
 module.exports = router;

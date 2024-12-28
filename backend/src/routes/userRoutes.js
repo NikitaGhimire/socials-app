@@ -4,7 +4,8 @@ const {
     loginUser,
     getUserProfile,
     updateUserProfile,
-    getAllUsers
+    getAllUsers,
+    deleteAllUsers
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -23,7 +24,11 @@ router.get("/profile", protect, getUserProfile);
 //update profile
 router.put("/update-profile", protect, upload.single("profilePicture"),updateUserProfile);
 
-router.get("/getAllUsers", protect, getAllUsers)
+router.get("/getAllUsers", protect, getAllUsers);
+
+//admin role
+
+router.delete('/delete-all-users', protect, deleteAllUsers);
 
 module.exports = router;
 

@@ -49,7 +49,7 @@ const sendFriendRequest = async (req, res) => {
     }
   };
 
-  //accept/reject friend request
+  //accept/reject/delete friend request
   const handleFriendRequest = async (req, res) => {
     const receiverId = req.user.id;
     const { senderId, action } = req.body; // `action` can be "accept" or "reject"
@@ -102,6 +102,11 @@ const sendFriendRequest = async (req, res) => {
         await request.save();
   
         res.status(200).json({ message: "Friend request rejected" });
+      } else if (action === "delete") {
+        // Delete the pending friend request
+        await FriendRequest.deleteOne({ _id: request._id });
+  
+        res.status(200).json({ message: "Friend request deleted successfully" });
       } else {
         res.status(400).json({ message: "Invalid action" });
       }
@@ -188,4 +193,45 @@ const sendFriendRequest = async (req, res) => {
   }
 };
 
-  module.exports = { sendFriendRequest, handleFriendRequest, listFriends, viewFriendRequest, unfriend };
+const viewSentFriendRequests = async (req, res) => {
+  try {
+      const senderId = req.user.id;
+
+      // Find all friend requests where the user is the sender and the status is 'pending'
+      const sentRequests = await FriendRequest.find({ sender: senderId, status: 'pending' })
+          .populate('sender', 'name email')  // Populate sender details
+          .populate('receiver', 'name email');  // Populate receiver details
+
+      res.status(200).json({
+          total: sentRequests.length,
+          sentRequests,
+      });
+  } catch (error) {
+      console.error("Error fetching sent friend requests:", error);
+      res.status(500).json({ error: "Failed to fetch sent friend requests" });
+  }
+};
+
+const deleteAllSentFriendRequests = async (req, res) => {
+  const senderId = req.user.id;
+
+  try {
+    // Delete all pending friend requests sent by the logged-in user
+    const deletedRequests = await FriendRequest.deleteMany({
+      sender: senderId,
+      status: "pending"
+    });
+
+    if (deletedRequests.deletedCount === 0) {
+      return res.status(404).json({ message: "No sent friend requests found" });
+    }
+
+    res.status(200).json({ message: `${deletedRequests.deletedCount} friend request(s) deleted successfully` });
+  } catch (error) {
+    console.error("Error deleting sent friend requests:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+  module.exports = { sendFriendRequest, handleFriendRequest, listFriends, viewFriendRequest, unfriend, viewSentFriendRequests, deleteAllSentFriendRequests };

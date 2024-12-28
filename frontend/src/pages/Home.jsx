@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContex';
 import api from '../services/api';
@@ -10,7 +10,11 @@ const Home = () => {
     const [friends, setFriends] = useState([]);
     const [friendRequests, setFriendRequests] = useState([]);
     const [selectedFriend, setSelectedFriend] = useState(null);
-    const [message, setMessage] = useState('');
+    const [conversations, setConversations] = useState([]);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [messages, setMessages] = useState([]);
+    // const [message, setMessage] = useState('');
+    const [newMessage, setNewMessage] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [hoveredUser, setHoveredUser] = useState(null);
@@ -20,6 +24,8 @@ const Home = () => {
     const [editingProfile, setEditingProfile] = useState(false);
     const [userProfile, setUserProfile] = useState({});
     const [friendsVisible, setFriendsVisible] = useState(false);
+    const searchRef = useRef(null);
+
     const [profileUpdates, setProfileUpdates] = useState({
         name: user?.name || '',
         email: user?.email || '',
@@ -58,6 +64,20 @@ const Home = () => {
                 setLoading(false);
             }
         }, []);
+
+         // Fetch all conversations for the user
+    const fetchConversations = useCallback(async () => {
+        try {
+            console.log('Fetching conversations...');
+            const response = await api.get('/messages/chats');
+            console.log('Fetched conversations:', response.data);
+            setConversations(response.data || []);
+        } catch (err) {
+            console.error('Error fetching conversations:', err.response ? err.response.data : err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
     
         useEffect(() => {
             if (!user) {
@@ -67,22 +87,63 @@ const Home = () => {
     
             
                 fetchUserData();
+                fetchConversations();
+                const handleClickOutside = (event) => {
+                    if (searchRef.current && !searchRef.current.contains(event.target)) {
+                        setSearchResults([]); // Clear search results when clicking outside
+                    }
+                };
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+                
         
-        }, [user, navigate, fetchUserData]);
+        }, [user, navigate, fetchUserData, fetchConversations]);
 
-    
 
-    const handleSendMessage = async () => {
-        if (!selectedFriend || !message) return;
-
+        
+    const deleteMessage = async (messageId) => {
         try {
-            await api.post("/messages/sendMessage", { receiverId: selectedFriend, content: message });
-            setMessage('');
-            alert('Message sent!');
-        } catch (err) {
-            console.error("Error sending message", err);
+            const response = await api.delete(`/messages/${messageId}`);
+    
+            if (response.status === 200) {
+                // Remove the deleted message from the UI
+                setMessages((prevMessages) => prevMessages.filter((msg) => msg._id !== messageId));
+                if (messages.length === 1) { // If last message is deleted
+                    deleteConversation(selectedConversation._id);
+                }
+                alert("Message deleted successfully");
+
+            } else {
+                console.error("Failed to delete message");
+            }
+        } catch (error) {
+            console.error("Error deleting message:", error);
+            alert("An error occurred while deleting the message");
         }
     };
+
+    const deleteConversation = async (conversationId) => {
+        try {
+            const response = await api.delete(`/messages/delete/${conversationId}`);
+    
+            if (response.status === 200) {
+                // Remove the deleted conversation from the UI
+                setConversations((prevConversations) =>
+                    prevConversations.filter((conv) => conv._id !== conversationId)
+                );
+                setSelectedConversation(null); // Clear the selected conversation
+                setMessages([]); // Clear messages
+                alert("Conversation deleted successfully");
+            } else {
+                console.error("Failed to delete conversation");
+            }
+        } catch (error) {
+            console.error("Error deleting conversation:", error);
+            alert("An error occurred while deleting the conversation");
+        }
+    };
+    
+    
 
     const handleSearch = async () => {
         if (!searchQuery) return;
@@ -110,6 +171,80 @@ const Home = () => {
         }
     };
 
+   
+
+    // Fetch messages for a selected conversation
+    const fetchMessages = async (conversationId) => {
+        try {
+            const response = await api.get(`/messages/${conversationId}`);
+            console.log('Fetched messages:', response.data);
+            if (Array.isArray(response.data)) {
+                setMessages(response.data); 
+             // Set messages only if it's an array
+            } else {
+                setMessages([]);  // If no messages, set empty array
+            }
+        } catch (err) {
+            console.error('Error fetching messages:', err.response ? err.response.data : err.message);
+        }
+    };
+
+    const handleSendMessage = async () => {
+        if (!selectedFriend && !selectedConversation) return;
+        if (!newMessage) return;
+    
+        // Determine receiverId and conversationId
+        const receiverId = selectedFriend || selectedConversation?.participants.find(
+            (participant) => participant._id !== user._id
+        )?._id;
+    
+        if (!receiverId) {
+            console.error('Receiver not found');
+            return;
+        }
+    
+        try {
+            // Send message request
+            const response = await api.post('/messages/sendMessage', {
+                conversation: selectedConversation?._id, // Pass existing conversation ID or undefined
+                receiverId,
+                sender: user._id,
+                content: newMessage,
+            });
+    
+            if (response.data?.message && response.data?.conversation) {
+                const { message, conversation } = response.data;
+    
+                // Update the message list if this is the selected conversation
+                if (selectedConversation?._id === conversation._id || !selectedConversation) {
+                    setMessages((prevMessages) => [
+                        ...prevMessages,
+                        { ...message, sender: { _id: user._id } }, // Ensure sender data
+                    ]);
+                }
+    
+                // Add conversation to the list if it's new
+                if (!conversations.find((conv) => conv._id === conversation._id)) {
+                    setConversations((prevConversations) => [
+                        ...prevConversations,
+                        conversation,
+                    ]);
+                }
+    
+                // Update selectedConversation if needed
+                if (!selectedConversation) setSelectedConversation(conversation);
+    
+                setNewMessage('');
+                setSelectedFriend(null); // Clear the selected friend after the message
+            } else {
+                console.error('Incomplete response from server.');
+            }
+        } catch (err) {
+            console.error('Error sending message:', err);
+            alert('Failed to send message. Please try again.');
+        }
+    };
+    
     const handleProfileUpdate = async () => {
         const formData = new FormData();
         formData.append("name", profileUpdates.name || user.name);
@@ -232,7 +367,7 @@ const Home = () => {
                     return [...prevFriends, response.data.newFriend];
                 });
                 setFriendRequests(prevRequests => prevRequests.filter(request => request.sender._id !== senderId));
-            } else if (action === "reject") {
+            } else if (action === "reject" || action === "delete") {
                 setFriendRequests(prevRequests => prevRequests.filter(request => request.sender._id !== senderId));
             }
         }
@@ -264,18 +399,6 @@ const Home = () => {
             console.error("Error unfriending:", error);
         }
     };
-    
-    //     // Function to fetch the updated list of friends
-    // const fetchFriends = async () => {
-    //     try {
-    //         const response = await api.get("/friends/myfriends");
-    //         if (response.status === 200) {
-    //             setFriends(response.data.uniqueFriends); // Update the state with the latest friends list
-    //         }
-    //     } catch (error) {
-    //         console.error("Error fetching friends:", error);
-    //     }
-    // };
 
     const handleInboxClick = () => {
         setSendMessageVisible(!sendMessageVisible);
@@ -370,9 +493,9 @@ const Home = () => {
                         )}
                     </div>
 
-
+                    <div className='other-sections'>
                     <div className="sections-wrapper">
-                            <div className="search-section">
+                            <div className="search-section" ref={searchRef}>
                                 <input
                                     type="text"
                                     placeholder="Search for a user"
@@ -423,72 +546,7 @@ const Home = () => {
                             </div>
 
 
-                        <div className="message-icon-section" onClick={handleInboxClick}>
-                            <img 
-                            src='./images/inbox.png'
-                            alt='inbox'
-                            className='inbox-icon'
-                            />
-                            {sendMessageVisible && (
-                                <div className="send-message-section">
-                                    <select 
-                                        value={selectedFriend || ""} 
-                                        onChange={(e) => setSelectedFriend(e.target.value)} 
-                                        className="friend-select"
-                                    >
-                                        <option value="">Select a Friend</option>
-                                        {Array.isArray(friends) && friends.length > 0 && friends.map((friend) => (
-                                            <option key={friend._id} value={friend._id}>
-                                                {friend.name}
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    <textarea
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        placeholder="Type your message here"
-                                        className="message-textarea"
-                                    />
-
-                                    <button onClick={handleSendMessage} className="send-button">Send</button>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="friend-requests-icon-section" onClick = {handleRequestClick}>
-                                <img
-                                src='./images/request.png' 
-                                alt='request-icon'
-                                className='request-icon'
-                                />
-                            {friendRequestsVisible && (
-                                <div className="friend-requests-section">
-                                    {friendRequests.length > 0 ? (
-                                        <ul>
-                                            {friendRequests.map((request) => (
-                                                <li key={request._id} className="friend-request-item">
-                                                    <img 
-                                                        src={request.sender.profilePicture ? `http://localhost:5000${request.sender.profilePicture}` : '/images/default.jpg'}
-                                                        alt={request.sender.name}
-                                                        className="profile-picture"
-                                                    />
-                                                    <p>{request.sender.name} has sent you a friend request</p>
-                                                    <button onClick={() => handleFriendRequest(request.sender._id, "accept")} className="accept-button">Accept</button>
-                                                    <button onClick={() => handleFriendRequest(request.sender._id, "reject")} className="reject-button">Reject</button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p>No friend requests</p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        
-                    </div>
-                    <div className="friends-section" onClick={handleFriendsClick}>
+                        <div className="friends-section" onClick={handleFriendsClick}>
                                 <img
                                 src='./images/friend.png'
                                 alt="Friends"
@@ -519,11 +577,169 @@ const Home = () => {
                                         )}
                                     </div>
                                 )}
+                    </div>
+
+                        <div className="friend-requests-icon-section" onClick = {handleRequestClick}>
+                                <img
+                                src='./images/request.png' 
+                                alt='request-icon'
+                                className='request-icon'
+                                />
+                            {friendRequestsVisible && (
+                                <div className="friend-requests-section">
+                                    {friendRequests.length > 0 ? (
+                                        <ul>
+                                            {friendRequests.map((request) => (
+                                                <li key={request._id} className="friend-request-item">
+                                                    <img 
+                                                        src={request.sender.profilePicture ? `http://localhost:5000${request.sender.profilePicture}` : '/images/default.jpg'}
+                                                        alt={request.sender.name}
+                                                        className="profile-picture"
+                                                    />
+                                                    <p>{request.sender.name} has sent you a friend request</p>
+                                                    <button onClick={() => handleFriendRequest(request.sender._id, "accept")} className="accept-button">Accept</button>
+                                                    <button onClick={() => handleFriendRequest(request.sender._id, "reject")} className="reject-button">Reject</button>
+                                                    <button onClick={() => handleFriendRequest(request.sender._id, "delete")} className="delete-button">Delete</button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p>No friend requests</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        
+                    </div>
+                    
+
+                    <div className="conversations-section">
+                        
+                        <div className="conversations-list">
+                            <h3>Conversations</h3>
+                            
+                            {conversations && conversations.length > 0 ? (
+                                <ul>
+                                {conversations.map((conv) => {
+                                    if (!conv._id || !conv.participants) {
+                                        console.error('Conversation data is incomplete:', conv);
+                                        return null;
+                                    }
+                                    return (
+                                    <li
+                                        key={conv._id}
+                                        className={`conversation-item ${selectedConversation?._id === conv._id ? 'active' : ''}`}
+                                        onClick={() => {
+                                            console.log('Conversation clicked:', conv);
+                                            setSelectedConversation(conv);
+                                            fetchMessages(conv._id);
+                                        }}
+                                    >
+                                    <p><strong>{(conv.participants || []).map(participant => participant.name).join(', ')}</strong></p>
+                                    <button onClick={() => deleteConversation(conv._id)} className="delete-conversation-button">
+                                        Delete
+                                    </button>
+                                    </li>
+                                    );
+                                })}
+                                </ul>
+                            ) : (
+                                <p>No conversations found.</p>
+                            )}
+                        </div>
+
+                        <div className="messages-section">
+                            {/* Send a Message Section */}
+                            <div className="message-icon-section"  onClick={handleInboxClick}>
+                                <img 
+                                    src='./images/inbox.png'
+                                    alt='inbox'
+                                    className='inbox-icon'
+                                    />
+                                    <h3>Send a Message</h3>
+                                    
+                                    <select
+                                        value={selectedFriend || ""}
+                                        onChange={(e) => setSelectedFriend(e.target.value)}
+                                        className="friend-select"
+                                    >
+                                        <option value="">Select a Friend</option>
+                                        {friends.map((friend) => (
+                                            <option key={friend._id} value={friend._id}>
+                                                {friend.name}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    <textarea
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        placeholder="Type your message here..."
+                                        className="message-textarea"
+                                    ></textarea>
+
+                                    <button
+                                        onClick={handleSendMessage}
+                                        disabled={!selectedFriend || !newMessage}
+                                        className="send-button"
+                                    >
+                                        Send Message
+                                    </button>
                             </div>
+                            <hr />
+                        <div className='conv-preview'>
+                        < hr />
+                        {selectedConversation ? (
+                            <>
+                            <h3>
+                                Messages with  <br></br>
+                                {selectedConversation?.participants?.find(participant => participant._id !== user._id)?.name || 'Unknown'}
+                            </h3>
+                            <div className="messages-list">
+                                {Array.isArray(messages) && messages.length > 0 ? (
+                                messages.map((msg) => {
+                                    if (!msg || !msg.sender) {
+                                        console.error('Invalid message or missing sender:', msg);
+                                        return null; // Skip invalid messages
+                                    }
+                                    return (
+                                        <div
+                                            key={msg._id}
+                                            className={`message-item ${msg.sender._id === user._id ? "sent" : "received"}`}
+                                        >
+                                            <p>{msg.content}</p>
+                                            {msg.sender._id === user._id && ( // Only allow deletion for sender
+                                            <button onClick={() => deleteMessage(msg._id)} className="delete-button">
+                                                🗑️
+                                            </button>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                                ) : (
+                                <p>No messages yet.</p>
+                                )}
+                            </div>
+                            <div className="message-input">
+                                <textarea
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                placeholder="Type a message..."
+                                />
+                                <button onClick={handleSendMessage} className='send-button'>Send</button>
+                            </div>
+                            </>
+                            ) : (
+                            <p>Select a conversation to view messages.</p>
+                            )}
+                        </div>
+                        </div>
+                    </div>
+                </div>
                 </>
             )}
         </div>
     );
 };
-
 export default Home;

@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 //generate jwt
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: "15m",
+        expiresIn: "30m",
     });
 };
 
@@ -113,9 +113,36 @@ const getAllUsers = async(req, res) => {
     }
 };
 
+// Delete all users
+const deleteAllUsers = async (req, res) => {
+    try {
+        // // Check if the user has admin privileges (you can modify this logic based on your needs)
+        // if (!req.user.isAdmin) {
+        //     return res.status(403).json({ message: "You do not have permission to delete users" });
+        // }
+
+        // Delete all users except for the logged-in admin
+        const deletedUsers = await User.deleteMany({ _id: { $ne: req.user._id } });
+
+        if (deletedUsers.deletedCount === 0) {
+            return res.status(404).json({ message: "No users found to delete" });
+        }
+
+        res.status(200).json({
+            message: `${deletedUsers.deletedCount} user(s) deleted successfully`
+        });
+    } catch (error) {
+        console.error("Error deleting users:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+  
+
 module.exports = { registerUser, 
                     loginUser, 
                     getUserProfile, 
                     updateUserProfile, 
                     getAllUsers,
+                    deleteAllUsers
                   };
