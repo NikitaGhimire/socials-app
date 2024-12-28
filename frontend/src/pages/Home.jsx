@@ -349,6 +349,7 @@ const Home = () => {
     };
 
     const handleProfileChange = (e) => {
+        console.log("Updating field:", e.target.name, "New value:", e.target.value);
         setProfileUpdates({ ...profileUpdates, [e.target.name]: e.target.value });
     };
     const handleFriendRequest = async (senderId, action) => {
@@ -617,7 +618,12 @@ const Home = () => {
                     <div className="conversations-section">
                         
                         <div className="conversations-list">
-                            <h3>Conversations</h3>
+                        <img 
+                                    src='./images/inbox.png'
+                                    alt='inbox'
+                                    className='inbox-icon'
+                                    />
+                            <h3>Conversations</h3> 
                             
                             {conversations && conversations.length > 0 ? (
                                 <ul>
@@ -637,9 +643,18 @@ const Home = () => {
                                         }}
                                     >
                                     <p><strong>{(conv.participants || []).map(participant => participant.name).join(', ')}</strong></p>
-                                    <button onClick={() => deleteConversation(conv._id)} className="delete-conversation-button">
+                                    {/* <button onClick={() => deleteConversation(conv._id)} className="delete-conversation-button">
                                         Delete
-                                    </button>
+                                    </button> */}
+                                    <img
+                                    src='/images/delete-icon.png'
+                                    alt='Delete conversation'
+                                    className='delete-conversation'
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent triggering the parent onClick
+                                        deleteConversation(conv._id);}
+                                    }
+                                    />
                                     </li>
                                     );
                                 })}
@@ -652,12 +667,7 @@ const Home = () => {
                         <div className="messages-section">
                             {/* Send a Message Section */}
                             <div className="message-icon-section"  onClick={handleInboxClick}>
-                                <img 
-                                    src='./images/inbox.png'
-                                    alt='inbox'
-                                    className='inbox-icon'
-                                    />
-                                    <h3>Send a Message</h3>
+                                    <h3>Send a new Message</h3>
                                     
                                     <select
                                         value={selectedFriend || ""}
@@ -675,17 +685,28 @@ const Home = () => {
                                     <textarea
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Type your message here..."
+                                        placeholder="Type message here..."
                                         className="message-textarea"
                                     ></textarea>
-
-                                    <button
+                                    {/* <button
                                         onClick={handleSendMessage}
                                         disabled={!selectedFriend || !newMessage}
                                         className="send-button"
                                     >
-                                        Send Message
-                                    </button>
+                                    Send
+                                    </button> */}
+
+                                    <img
+                                    src='/images/send-icon.png'
+                                    alt='send-message'
+                                    className='send-button'
+                                    onClick={(e)=> {
+                                        e.stopPropagation();
+                                        
+                                        if (selectedFriend && newMessage) {
+                                            handleSendMessage();
+                                        }
+                                    } } />
                             </div>
                             <hr />
                         <div className='conv-preview'>
@@ -710,9 +731,18 @@ const Home = () => {
                                         >
                                             <p>{msg.content}</p>
                                             {msg.sender._id === user._id && ( // Only allow deletion for sender
-                                            <button onClick={() => deleteMessage(msg._id)} className="delete-button">
-                                                🗑️
-                                            </button>
+                                            // <button onClick={() => deleteMessage(msg._id)} className="delete-button">
+                                            //     🗑️
+                                            // </button>
+                                            <img 
+                                            src='/images/delete-icon.png'
+                                            alt='delete message'
+                                            className='delete-msg'
+                                            onClick={(e)=>{
+                                                e.stopPropagation();
+                                                deleteMessage(msg._id)
+                                            }}
+                                            />
                                             )}
                                         </div>
                                     );
@@ -727,7 +757,18 @@ const Home = () => {
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 placeholder="Type a message..."
                                 />
-                                <button onClick={handleSendMessage} className='send-button'>Send</button>
+                                <img
+                                    src='/images/send-icon.png'
+                                    alt='send-message'
+                                    className='send-button'
+                                    onClick={(e)=> {
+                                        e.stopPropagation();
+                                        
+                                        if (selectedFriend && newMessage) {
+                                            handleSendMessage();
+                                        }
+                                    } } />
+                                {/* <button onClick={handleSendMessage} className='send-button'>Send</button> */}
                             </div>
                             </>
                             ) : (

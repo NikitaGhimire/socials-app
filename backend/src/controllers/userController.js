@@ -19,12 +19,15 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "User already exists" });
         }
 
-        const user = await User.create({ name, email, password });
+        const user = await User.create({ name, email, password, bio: "", statusMessage:"Busy" });
         if (user) {
             res.status(201).json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                profilePicture: "/uploads/default.jpg", // Default profile picture
+            statusMessage: "Busy", // Default status message
+            bio: "", // Default bio (empty)
                 token: generateToken(user._id),
             });
         } else {
@@ -47,6 +50,8 @@ const loginUser = async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                bio: user.bio || "",
+                statusMessage: user.statusMessage || "Busy",
                 token: generateToken(user._id),
             });
         } else {
