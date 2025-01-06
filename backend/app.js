@@ -6,6 +6,7 @@ const path = require("path");
 const userRoutes = require("./src/routes/userRoutes");
 const friendRoutes = require("./src/routes/friendRoutes");
 const messageRoutes = require("./src/routes/messageRoutes");
+const postRoutes = require("./src/routes/postRoutes");
 
 
 const app = express();
@@ -35,6 +36,7 @@ app.use((err, req, res, next) => {
 app.use("/api/users", userRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/posts", postRoutes);
 
 
 // Export the app to use it in server.js

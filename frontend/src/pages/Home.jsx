@@ -13,7 +13,6 @@ const Home = () => {
     const [conversations, setConversations] = useState([]);
     const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
-    // const [message, setMessage] = useState('');
     const [newMessage, setNewMessage] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -57,6 +56,8 @@ const Home = () => {
                 if (profileResponse.status === 200) {
                     setUserProfile(profileResponse.data); 
                 }
+
+                
             } catch (err) {
                 console.error("Error fetching data", err.response ? err.response.data : err.message);
             } finally {
@@ -217,7 +218,7 @@ const Home = () => {
     
                 // Update the message list if this is the selected conversation
                 if (selectedConversation?._id === conversation._id || !selectedConversation) {
-                    setMessages((prevMessages) => [
+                    setMessages(prevMessages => [
                         ...prevMessages,
                         { ...message, sender: { _id: user._id } }, // Ensure sender data
                     ]);
@@ -225,20 +226,23 @@ const Home = () => {
     
                 // Add conversation to the list if it's new
                 if (!conversations.find((conv) => conv._id === conversation._id)) {
-                    setConversations((prevConversations) => [
+                    setConversations(prevConversations => [
                         ...prevConversations,
                         conversation,
                     ]);
                 }
+
+                // Set the new or updated conversation as the selected conversation
+            setSelectedConversation(conversation);
     
                 // Update selectedConversation if needed
-                if (!selectedConversation) setSelectedConversation(conversation);
-    
-                setNewMessage('');
-                setSelectedFriend(null); // Clear the selected friend after the message
-            } else {
-                console.error('Incomplete response from server.');
-            }
+                if (!selectedConversation) 
+                    setSelectedConversation(conversation);
+                    setNewMessage('');
+                    setSelectedFriend(null); // Clear the selected friend after the message
+                } else {
+                    console.error('Incomplete response from server.');
+                }
         } catch (err) {
             console.error('Error sending message:', err);
             alert('Failed to send message. Please try again.');
@@ -318,6 +322,7 @@ const Home = () => {
             // Log the success response
             console.log("Friend request sent successfully:", response.data);
             alert("Friend request sent!");
+            fetchUserData();
         } catch (err) {
             console.error("Error sending friend request:", err);
     
@@ -354,11 +359,11 @@ const Home = () => {
     };
     const handleFriendRequest = async (senderId, action) => {
         try {
-        const response = await api.put(
-            '/friends/handle-request', 
-            { senderId, action }, 
-            { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-        );
+            const response = await api.put(
+                '/friends/handle-request', 
+                { senderId, action }, 
+                { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+            );
 
         if (response.data.newFriend) {
             if (action === "accept") {
@@ -370,10 +375,11 @@ const Home = () => {
                 setFriendRequests(prevRequests => prevRequests.filter(request => request.sender._id !== senderId));
             } else if (action === "reject" || action === "delete") {
                 setFriendRequests(prevRequests => prevRequests.filter(request => request.sender._id !== senderId));
-            }
+            }   
         }
 
         alert(response.data.message);
+        fetchUserData();
     } catch (error) {
         console.error("Error handling friend request:", error);
         alert("An error occurred while processing the friend request.");
@@ -391,7 +397,7 @@ const Home = () => {
             if (response.status === 200) {
                 console.log("Friend removed successfully");
                 // update the local friend list by filtering out the unfriended user
-                // fetchFriends();
+                fetchUserData();
                 setFriends((prevFriends) => prevFriends.filter(friend => friend._id !== friendId));
             } else {
                 console.error("Failed to unfriend");
@@ -614,7 +620,9 @@ const Home = () => {
                         
                     </div>
                     
-
+                    <div className="post-section">
+                        <p>You and your posts here</p>
+                    </div>
                     <div className="conversations-section">
                         
                         <div className="conversations-list">
@@ -688,15 +696,15 @@ const Home = () => {
                                         placeholder="Type message here..."
                                         className="message-textarea"
                                     ></textarea>
-                                    {/* <button
+                                    <button
                                         onClick={handleSendMessage}
                                         disabled={!selectedFriend || !newMessage}
                                         className="send-button"
                                     >
                                     Send
-                                    </button> */}
+                                    </button>
 
-                                    <img
+                                    {/* <img
                                     src='/images/send-icon.png'
                                     alt='send-message'
                                     className='send-button'
@@ -706,7 +714,7 @@ const Home = () => {
                                         if (selectedFriend && newMessage) {
                                             handleSendMessage();
                                         }
-                                    } } />
+                                    } } /> */}
                             </div>
                             <hr />
                         <div className='conv-preview'>
@@ -757,7 +765,7 @@ const Home = () => {
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 placeholder="Type a message..."
                                 />
-                                <img
+                                {/* <img
                                     src='/images/send-icon.png'
                                     alt='send-message'
                                     className='send-button'
@@ -767,8 +775,8 @@ const Home = () => {
                                         if (selectedFriend && newMessage) {
                                             handleSendMessage();
                                         }
-                                    } } />
-                                {/* <button onClick={handleSendMessage} className='send-button'>Send</button> */}
+                                    } } /> */}
+                                <button onClick={handleSendMessage} className='send-button'>Send</button>
                             </div>
                             </>
                             ) : (
