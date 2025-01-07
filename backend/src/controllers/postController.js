@@ -26,7 +26,11 @@ const createPost = async (req, res) => {
 
     await newPost.save();
     console.log("Post saved successfully:", newPost); // Debugging: Confirm post is saved
-    res.status(201).json(newPost);
+    // Populate author details
+    const populatedPost = await Post.findById(newPost._id).populate("author", "name profilePicture _id");
+
+    console.log("Populated post with author details:", populatedPost); // Debugging: Confirm populated post
+    res.status(201).json(populatedPost);
   } catch (error) {
     console.error("Error creating post:", error); // Debugging: Log error details
     res.status(500).json({ message: "Failed to create post", error });

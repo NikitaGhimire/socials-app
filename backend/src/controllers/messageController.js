@@ -64,7 +64,7 @@ const getConversations = async (req, res) => {
         });
       // Check if conversations were found
   if (!conversations || conversations.length === 0) {
-      return res.status(404).json({ message: "No conversations found" });
+      return res.status(200).json([]);
     }
 
     res.status(200).json(conversations);
