@@ -7,25 +7,42 @@ export const AuthProvider = ({children}) => {
 
     // Load user data from localStorage on initial load (if exists)
     useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem("user"));
-        if (storedUser) {
-            setUser(storedUser);
+        try{
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+            if (storedUser) {
+                setUser(storedUser);
+            }
+        } catch (err){
+            console.error("Failed to parse user from localStorage:", err);
+            setUser(null);
         }
-    }, []);
+        }, []);
     const login = (userData) => {
-        localStorage.setItem("user", JSON.stringify(userData));
-        setUser(userData);
+        try {
+            localStorage.setItem("user", JSON.stringify(userData));
+            setUser(userData);
+        } catch (err) {
+            console.error("Error during login:", err);
+        }
     };
 
     const logout = () => {
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        setUser(null);
+        try {
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            setUser(null);
+        } catch (err) {
+            console.error("Error during logout:", err);
+        }
     };
 
     const updateUser = (updatedUserData) => {
-        localStorage.setItem("user", JSON.stringify(updatedUserData));
-        setUser(updatedUserData);
+        try {
+            localStorage.setItem("user", JSON.stringify(updatedUserData));
+            setUser(updatedUserData);
+        } catch (err) {
+            console.error("Error updating user:", err);
+        }
     };
 
     return (

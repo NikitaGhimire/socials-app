@@ -5,7 +5,7 @@ import api from '../services/api';
 import '../styles/home.css';
 
 const Home = () => {
-    const { user, logout, updateUser } = useAuth();
+    const { user, logout } = useAuth();
     const [profileVisible, setProfileVisible] = useState(false);
     const [friends, setFriends] = useState([]);
     const [friendRequests, setFriendRequests] = useState([]);
@@ -37,72 +37,6 @@ const Home = () => {
     });
 
     const navigate = useNavigate();
-
-    // const fetchUserData = useCallback(async () => {
-    //     try {
-    //         console.log("Fetching user data...");
-    //         setLoading(true);
-
-    //         // Fetch friends
-    //         const response = await api.get("/friends/myfriends");
-    //         console.log("Fetched friends:", response.data);
-    //         setFriends(response.data.uniqueFriends);
-
-    //         // Fetch friend requests
-    //         const requestsResponse = await api.get("/friends/requests");
-    //         console.log("Fetched friend requests:", requestsResponse.data);
-    //         setFriendRequests(requestsResponse.data.friendRequests);
-
-    //         // Fetch user profile details
-    //         const profileResponse = await api.get("/users/profile");
-    //         console.log("Fetched profile:", profileResponse.data);
-    //         if (profileResponse.status === 200) {
-    //             setUserProfile(profileResponse.data); 
-    //         }
-
-            
-    //     } catch (err) {
-    //         console.error("Error fetching data", err.response ? err.response.data : err.message);
-    //     } finally {
-    //         console.log("Data fetch complete.");
-    //         setLoading(false);
-    //     }
-    // }, []);
-
-    //      // Fetch all conversations for the user
-    // const fetchConversations = useCallback(async () => {
-    //     try {
-    //         console.log('Fetching conversations...');
-    //         const response = await api.get('/messages/chats');
-    //         console.log('Fetched conversations:', response.data);
-    //         setConversations(response.data || []);
-    //     } catch (err) {
-    //         console.error('Error fetching conversations:', err.response ? err.response.data : err.message);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }, []);
-    
-    //     useEffect(() => {
-    //         if (!user) {
-    //             navigate("/login");
-    //             return;
-    //         }
-    
-            
-    //             fetchUserData();
-    //             fetchConversations();
-    //             const handleClickOutside = (event) => {
-    //                 if (searchRef.current && !searchRef.current.contains(event.target)) {
-    //                     setSearchResults([]); // Clear search results when clicking outside
-    //                 }
-    //             };
-    //             document.addEventListener('mousedown', handleClickOutside);
-    //             return () => document.removeEventListener('mousedown', handleClickOutside);
-                
-        
-    //     }, [user, navigate, fetchUserData, fetchConversations]);
-
 
     const fetchUserData = useCallback(async () => {
         try {
@@ -211,8 +145,6 @@ const Home = () => {
         }
     };
     
-    
-
     const handleSearch = async () => {
         if (!searchQuery) return;
 
@@ -226,20 +158,6 @@ const Home = () => {
             console.error("Error fetching users", err);
         }
     };
-    
-    // // Function to fetch the updated profile details
-    // const fetchUserProfile = async () => {
-    //     try {
-    //         const response = await api.get("/users/profile"); // Adjust the endpoint as needed
-    //         if (response.status === 200) {
-    //             updateUser(response.data); // Update the local state with the latest user data
-    //         }
-    //     } catch (error) {
-    //         console.error("Error fetching user profile:", error);
-    //     }
-    // };
-
-   
 
     // Fetch messages for a selected conversation
     const fetchMessages = async (conversationId) => {
@@ -257,131 +175,70 @@ const Home = () => {
         }
     };
 
-    // const handleSendMessage = async () => {
-    //     if (!selectedFriend && !selectedConversation) return;
-    //     if (!newMessage) return;
-    
-    //     // Determine receiverId and conversationId
-    //     const receiverId = selectedFriend || selectedConversation?.participants.find(
-    //         (participant) => participant._id !== user._id
-    //     )?._id;
-    
-    //     if (!receiverId) {
-    //         console.error('Receiver not found');
-    //         return;
-    //     }
-    
-    //     try {
-    //         // Send message request
-    //         const response = await api.post('/messages/sendMessage', {
-    //             conversation: selectedConversation?._id, // Pass existing conversation ID or undefined
-    //             receiverId,
-    //             sender: user._id,
-    //             content: newMessage,
-    //         });
-    
-    //         if (response.data?.message && response.data?.conversation) {
-    //             const { message, conversation } = response.data;
-    
-    //             // Update the message list if this is the selected conversation
-    //             if (selectedConversation?._id === conversation._id || !selectedConversation) {
-    //                 setMessages(prevMessages => [
-    //                     ...prevMessages,
-    //                     { ...message, sender: { _id: user._id } }, // Ensure sender data
-    //                 ]);
-    //             }
-    
-    //             // Add conversation to the list if it's new
-    //             if (!conversations.find((conv) => conv._id === conversation._id)) {
-    //                 setConversations(prevConversations => [
-    //                     ...prevConversations,
-    //                     conversation,
-    //                 ]);
-    //             }
-
-    //             // Set the new or updated conversation as the selected conversation
-    //         setSelectedConversation(conversation);
-    
-    //             // Update selectedConversation if needed
-    //             if (!selectedConversation) 
-    //                 setSelectedConversation(conversation);
-    //                 setNewMessage('');
-    //                 setSelectedFriend(null); // Clear the selected friend after the message
-    //             } else {
-    //                 console.error('Incomplete response from server.');
-    //             }
-    //     } catch (err) {
-    //         console.error('Error sending message:', err);
-    //         alert('Failed to send message. Please try again.');
-    //     }
-    // };
-
+    //send message to friend
     const handleSendMessage = async () => {
-    let receiverId;
-    let conversationId;
+        let receiverId;
+        let conversationId;
 
-    // Determine the receiverId and conversationId
-    if (selectedFriend) {
-        receiverId = selectedFriend;
-    } else if (selectedConversation) {
-        receiverId = selectedConversation?.participants?.find(
-            (participant) => participant._id !== user._id
-        )?._id;
-        conversationId = selectedConversation._id;
-    }
-
-    if (!receiverId) {
-        console.error('Receiver not found');
-        return;
-    }
-
-    try {
-        // Sending the message
-        const response = await api.post('/messages/sendMessage', {
-            conversation: conversationId,
-            receiverId,
-            sender: user._id,
-            content: newMessage,
-        });
-
-        if (response.data?.message && response.data?.conversation) {
-            const { message, conversation } = response.data;
-
-            // Update the message list if this is the selected conversation
-            if (!selectedConversation) {
-                // If no selected conversation, select the new conversation
-                setSelectedConversation(conversation);
-            }
-
-            // Add the new message to the messages list
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                { ...message, sender: { _id: user._id } },
-            ]);
-
-            // If the conversation is new, add it to the conversation list
-            if (!conversations.find((conv) => conv._id === conversation._id)) {
-                setConversations((prevConversations) => [
-                    ...prevConversations,
-                    conversation,
-                ]);
-            }
-
-            // Reset the message input
-            setNewMessage('');
-            setSelectedFriend(null); // Clear the selected friend after the message
-        } else {
-            console.error('Incomplete response from server.');
+        // Determine the receiverId and conversationId
+        if (selectedFriend) {
+            receiverId = selectedFriend;
+        } else if (selectedConversation) {
+            receiverId = selectedConversation?.participants?.find(
+                (participant) => participant._id !== user._id
+            )?._id;
+            conversationId = selectedConversation._id;
         }
-    } catch (err) {
-        console.error('Error sending message:', err);
-        alert('Failed to send message. Please try again.');
-    }
-};
 
-    
-    
-    
+        if (!receiverId) {
+            console.error('Receiver not found');
+            return;
+        }
+
+        try {
+            // Sending the message
+            const response = await api.post('/messages/sendMessage', {
+                conversation: conversationId,
+                receiverId,
+                sender: user._id,
+                content: newMessage,
+            });
+
+            if (response.data?.message && response.data?.conversation) {
+                const { message, conversation } = response.data;
+
+                // Update the message list if this is the selected conversation
+                if (!selectedConversation) {
+                    // If no selected conversation, select the new conversation
+                    setSelectedConversation(conversation);
+                }
+
+                // Add the new message to the messages list
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    { ...message, sender: { _id: user._id } },
+                ]);
+
+                // If the conversation is new, add it to the conversation list
+                if (!conversations.find((conv) => conv._id === conversation._id)) {
+                    setConversations((prevConversations) => [
+                        ...prevConversations,
+                        conversation,
+                    ]);
+                }
+
+                // Reset the message input
+                setNewMessage('');
+                setSelectedFriend(null); // Clear the selected friend after the message
+            } else {
+                console.error('Incomplete response from server.');
+            }
+        } catch (err) {
+            console.error('Error sending message:', err);
+            alert('Failed to send message. Please try again.');
+        }
+    };
+
     const handleProfileUpdate = async () => {
         const formData = new FormData();
         formData.append("name", profileUpdates.name || user.name);
@@ -401,16 +258,8 @@ const Home = () => {
             });
 
             const updatedUser = response.data;
-            // Debug: Log the response from the server
-        console.log("Response from update-profile API:", updatedUser);
-            // Debug: Fetch the updated user profile from the backend
-        console.log("Fetching the updated user profile...");
-            // await fetchUserProfile();
             await fetchUserData();  // This fetches the profile and all other user-related data
 
-
-            // Debug: Check what is being stored in localStorage
-        console.log("Storing updated user data in localStorage:", updatedUser);
             // Persist the updated user data in localStorage
             localStorage.setItem("user", JSON.stringify(updatedUser));
 
@@ -569,6 +418,20 @@ const Home = () => {
         }
     };
 
+    const handleLogout = () => {
+        setProfileVisible(false);
+        setFriends([]);
+        setFriendRequests([]);
+        setSelectedFriend(null);
+        setConversations([]);
+        setSelectedConversation(null);
+        setMessages([]);
+        setNewMessage('');
+        navigate('/login');
+        logout();
+    };
+    
+
     const handleDeletePost = async (postId) => {
         try {
           await api.delete(`/posts/${postId}`, {
@@ -616,497 +479,501 @@ const Home = () => {
 
     return (
         <div className="home-container">
-            {loading ? (
-                <div>Loading...</div>
-            ) : (
-                <>
-                    <div className="profile-section" onClick={handleProfileClick}>
-                        <img 
-                            src={userProfile?.profilePicture ? `http://localhost:5000${userProfile.profilePicture}` : '/images/default.jpg'}
-                            alt={userProfile?.name || "User"} 
-                            className="profile-picture-icon" 
-                        />
-                        {profileVisible && !editingProfile && (
-                            <div className="profile-details">
-                                {/* <img 
-                                    src={userProfile?.profilePicture ?`http://localhost:5000${userProfile.profilePicture}` : '/images/default.jpg'} 
-                                    alt={userProfile?.name || "User"} 
-                                    className="profile-picture" 
-                                /> */}
-                                <p>Name: {userProfile?.name}</p>
-                                <p>Email: {userProfile?.email}</p>
-                                <p>Bio: {userProfile?.bio}</p>
-                                <p>Status: {userProfile?.statusMessage}</p>
-                                <button onClick={handleEditProfile} className="edit-profile-button">
-                                    Edit Profile
-                                </button>
-                                <button onClick={logout} className="logout-button">Logout</button>
-                            </div>
-                        )}
-                        
-                        {editingProfile && (
-                            <div className="edit-profile-form">
-                                <label>
-                                    Profile Picture:
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        className="profile-picture-input"
-                                    />
-                                </label>
-                                <label>
-                                    Name:
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={profileUpdates.name}
-                                        onChange={handleProfileChange}
-                                    />
-                                </label>
-                                <label>
-                                    Email:
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={profileUpdates.email}
-                                        onChange={handleProfileChange}
-                                    />
-                                </label>
-                                <label>
-                                    Bio:
-                                    <textarea
-                                        name="bio"
-                                        value={profileUpdates.bio}
-                                        onChange={handleProfileChange}
-                                    ></textarea>
-                                </label>
-                                <label>
-                                    Status:
-                                    <input
-                                        type="text"
-                                        name="status"
-                                        value={profileUpdates.statusMessage}
-                                        onChange={handleProfileChange}
-                                    />
-                                </label>
-                                <button onClick={handleProfileUpdate} className="save-profile-button">
-                                    Save
-                                </button>
-                                <button onClick={() => setEditingProfile(false)} className="cancel-button">
-                                    Cancel
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className='other-sections'>
-                        <div className="sections-wrapper">
-                                <div className="search-section" ref={searchRef}>
-                                    <input
-                                        type="text"
-                                        placeholder="Search for a user"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="search-input"
-                                    />
-                                    <button onClick={handleSearch} className="search-button">Search</button>
-
-                                    {searchQuery && searchResults.length === 0 && (
-                                        <p>No users found</p>
-                                    )}
-
-                                    {searchResults.length > 0 && (
-                                        <ul>
-                                            {searchResults.map((user) => (
-                                                <li 
-                                                    key={user._id}
-                                                    onMouseEnter={() => setHoveredUser(user)}
-                                                    onMouseLeave={() => setHoveredUser(null)}
-                                                    className="search-result-item"
-                                                >
-                                                    {user.name}
-                                                    {isFriend(user._id) ? (
-                                                        <span> &#x1F91D; Already Friends</span>
-                                                    ) : (
-                                                        <button onClick={() => sendFriendRequest(user._id)} className="send-request-button">Send Friend Request</button>
-                                                    )}
-
-                                                    {hoveredUser && hoveredUser._id === user._id && (
-                                                        <div className="user-profile-popup">
-                                                            <img 
-                                                                src={user.profilePicture ? `http://localhost:5000${user.profilePicture}` : '/images/default.jpg'} 
-                                                                alt={user.name} 
-                                                                className="profile-picture" 
-                                                            />
-                                                            <div className="profile-details">
-                                                                <p><strong>Name:</strong> {user.name}</p>
-                                                                <p><strong>Bio:</strong> {user.bio || 'No bio available'}</p>
-                                                                <p><strong>Status:</strong> {user.statusMessage || 'No status available'}</p>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
+            { user ? (
+                <> {loading ? (
+                    <div>Loading...</div>
+                ) : (
+                    <>
+                        <div className="profile-section" onClick={handleProfileClick}>
+                            <img 
+                                src={userProfile?.profilePicture ? `http://localhost:5000${userProfile.profilePicture}` : '/images/default.jpg'}
+                                alt={userProfile?.name || "User"} 
+                                className="profile-picture-icon" 
+                            />
+                            {profileVisible && !editingProfile && (
+                                <div className="profile-details">
+                                    {/* <img 
+                                        src={userProfile?.profilePicture ?`http://localhost:5000${userProfile.profilePicture}` : '/images/default.jpg'} 
+                                        alt={userProfile?.name || "User"} 
+                                        className="profile-picture" 
+                                    /> */}
+                                    <p>Name: {userProfile?.name}</p>
+                                    <p>Email: {userProfile?.email}</p>
+                                    <p>Bio: {userProfile?.bio}</p>
+                                    <p>Status: {userProfile?.statusMessage}</p>
+                                    <button onClick={handleEditProfile} className="edit-profile-button">
+                                        Edit Profile
+                                    </button>
+                                    <button onClick={handleLogout} className="logout-button">Logout</button>
                                 </div>
-
-
-                                <div className="friends-section" onClick={handleFriendsClick}>
-                                        <img
-                                        src='./images/friend.png'
-                                        alt="Friends"
-                                        className="my-friends"
+                            )}
+                            
+                            {editingProfile && (
+                                <div className="edit-profile-form">
+                                    <label>
+                                        Profile Picture:
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                            className="profile-picture-input"
                                         />
-                                        {friendsVisible && (
-                                            <div>
-                                                {friends.length > 0 ? (
-                                                    <ul>
-                                                        {friends.map((friend) => (
-                                                            <li key={friend._id} className="friend-item">
-                                                                <img
-                                                                    src={friend.profilePicture ? `http://localhost:5000${friend.profilePicture}` : '/images/default.jpg'}
-                                                                    alt={friend.name}
-                                                                    className="friend-profile-picture"
+                                    </label>
+                                    <label>
+                                        Name:
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={profileUpdates.name}
+                                            onChange={handleProfileChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Email:
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={profileUpdates.email}
+                                            onChange={handleProfileChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Bio:
+                                        <textarea
+                                            name="bio"
+                                            value={profileUpdates.bio}
+                                            onChange={handleProfileChange}
+                                        ></textarea>
+                                    </label>
+                                    <label>
+                                        Status:
+                                        <input
+                                            type="text"
+                                            name="status"
+                                            value={profileUpdates.statusMessage}
+                                            onChange={handleProfileChange}
+                                        />
+                                    </label>
+                                    <button onClick={handleProfileUpdate} className="save-profile-button">
+                                        Save
+                                    </button>
+                                    <button onClick={() => setEditingProfile(false)} className="cancel-button">
+                                        Cancel
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+    
+                        <div className='other-sections'>
+                            <div className="sections-wrapper">
+                                    <div className="search-section" ref={searchRef}>
+                                        <input
+                                            type="text"
+                                            placeholder="Search for a user"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="search-input"
+                                        />
+                                        <button onClick={handleSearch} className="search-button">Search</button>
+    
+                                        {searchQuery && searchResults.length === 0 && (
+                                            <p>No users found</p>
+                                        )}
+    
+                                        {searchResults.length > 0 && (
+                                            <ul>
+                                                {searchResults.map((user) => (
+                                                    <li 
+                                                        key={user._id}
+                                                        onMouseEnter={() => setHoveredUser(user)}
+                                                        onMouseLeave={() => setHoveredUser(null)}
+                                                        className="search-result-item"
+                                                    >
+                                                        {user.name}
+                                                        {isFriend(user._id) ? (
+                                                            <span> &#x1F91D; Already Friends</span>
+                                                        ) : (
+                                                            <button onClick={() => sendFriendRequest(user._id)} className="send-request-button">Send Friend Request</button>
+                                                        )}
+    
+                                                        {hoveredUser && hoveredUser._id === user._id && (
+                                                            <div className="user-profile-popup">
+                                                                <img 
+                                                                    src={user.profilePicture ? `http://localhost:5000${user.profilePicture}` : '/images/default.jpg'} 
+                                                                    alt={user.name} 
+                                                                    className="profile-picture" 
                                                                 />
-                                                                <div className="friend-details">
-                                                                    <p> {friend.name} </p>
+                                                                <div className="profile-details">
+                                                                    <p><strong>Name:</strong> {user.name}</p>
+                                                                    <p><strong>Bio:</strong> {user.bio || 'No bio available'}</p>
+                                                                    <p><strong>Status:</strong> {user.statusMessage || 'No status available'}</p>
                                                                 </div>
-                                                                <button onClick={() => handleUnfriend(friend._id)} className="unfriend-button">
-                                                                    Unfriend
-                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+    
+    
+                                    <div className="friends-section" onClick={handleFriendsClick}>
+                                            <img
+                                            src='./images/friend.png'
+                                            alt="Friends"
+                                            className="my-friends"
+                                            />
+                                            {friendsVisible && (
+                                                <div>
+                                                    {friends.length > 0 ? (
+                                                        <ul>
+                                                            {friends.map((friend) => (
+                                                                <li key={friend._id} className="friend-item">
+                                                                    <img
+                                                                        src={friend.profilePicture ? `http://localhost:5000${friend.profilePicture}` : '/images/default.jpg'}
+                                                                        alt={friend.name}
+                                                                        className="friend-profile-picture"
+                                                                    />
+                                                                    <div className="friend-details">
+                                                                        <p> {friend.name} </p>
+                                                                    </div>
+                                                                    <button onClick={() => handleUnfriend(friend._id)} className="unfriend-button">
+                                                                        Unfriend
+                                                                    </button>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    ) : (
+                                                        <p>You have no friends yet.</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                    </div>
+    
+                                    <div className="friend-requests-icon-section" onClick = {handleRequestClick}>
+                                            <img
+                                            src='./images/request.png' 
+                                            alt='request-icon'
+                                            className='request-icon'
+                                            />
+                                        {friendRequestsVisible && (
+                                            <div className="friend-requests-section">
+                                                {friendRequests.length > 0 ? (
+                                                    <ul>
+                                                        {friendRequests.map((request) => (
+                                                            <li key={request._id} className="friend-request-item">
+                                                                <img 
+                                                                    src={request.sender.profilePicture ? `http://localhost:5000${request.sender.profilePicture}` : '/images/default.jpg'}
+                                                                    alt={request.sender.name}
+                                                                    className="profile-picture"
+                                                                />
+                                                                <p>{request.sender.name} has sent you a friend request</p>
+                                                                <button onClick={() => handleFriendRequest(request.sender._id, "accept")} className="accept-button">Accept</button>
+                                                                <button onClick={() => handleFriendRequest(request.sender._id, "reject")} className="reject-button">Reject</button>
+                                                                <button onClick={() => handleFriendRequest(request.sender._id, "delete")} className="delete-button">Delete</button>
                                                             </li>
                                                         ))}
                                                     </ul>
                                                 ) : (
-                                                    <p>You have no friends yet.</p>
+                                                    <p>No friend requests</p>
                                                 )}
                                             </div>
                                         )}
-                                </div>
-
-                                <div className="friend-requests-icon-section" onClick = {handleRequestClick}>
-                                        <img
-                                        src='./images/request.png' 
-                                        alt='request-icon'
-                                        className='request-icon'
-                                        />
-                                    {friendRequestsVisible && (
-                                        <div className="friend-requests-section">
-                                            {friendRequests.length > 0 ? (
-                                                <ul>
-                                                    {friendRequests.map((request) => (
-                                                        <li key={request._id} className="friend-request-item">
-                                                            <img 
-                                                                src={request.sender.profilePicture ? `http://localhost:5000${request.sender.profilePicture}` : '/images/default.jpg'}
-                                                                alt={request.sender.name}
-                                                                className="profile-picture"
-                                                            />
-                                                            <p>{request.sender.name} has sent you a friend request</p>
-                                                            <button onClick={() => handleFriendRequest(request.sender._id, "accept")} className="accept-button">Accept</button>
-                                                            <button onClick={() => handleFriendRequest(request.sender._id, "reject")} className="reject-button">Reject</button>
-                                                            <button onClick={() => handleFriendRequest(request.sender._id, "delete")} className="delete-button">Delete</button>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p>No friend requests</p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>    
-                    </div>
+                                    </div>    
+                        </div>
+                        
                     
-                
-                        <div className="post-section">
-                        <h3>Create a New Post</h3>
-                            <div className="create-post">
+                            <div className="post-section">
+                            <h3>Create a New Post</h3>
+                                <div className="create-post">
+                                    
+                                    <textarea
+                                        value={newPost.text}
+                                        onChange={(e) => setNewPost({ ...newPost, text: e.target.value })}
+                                        placeholder="What's on your mind?"
+                                    ></textarea>
+                                                                {/* Custom Attachment Icon */}
+                                    <label htmlFor="file-input" className="attachment-icon">
+                                        <img src="/images/image-attachment-icon.png" alt="Attachment" /> 
+                                    </label>
+                                    <input
+                                        id='file-input'
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setNewPost({ ...newPost, image: e.target.files[0] })}
+                                        style={{ display: "none" }}  // Hide the default file input
+                                    />
+                                    <button onClick={handleCreatePost}>Post</button>
+                                    
+                                </div>
                                 
-                                <textarea
-                                    value={newPost.text}
-                                    onChange={(e) => setNewPost({ ...newPost, text: e.target.value })}
-                                    placeholder="What's on your mind?"
-                                ></textarea>
-                                                            {/* Custom Attachment Icon */}
-                                <label htmlFor="file-input" className="attachment-icon">
-                                    <img src="/images/image-attachment-icon.png" alt="Attachment" /> 
-                                </label>
-                                <input
-                                    id='file-input'
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setNewPost({ ...newPost, image: e.target.files[0] })}
-                                    style={{ display: "none" }}  // Hide the default file input
-                                />
-                                <button onClick={handleCreatePost}>Post</button>
+                                <div className="your-posts">
+                                <hr />
+                                    
+                                    {loadingPosts ? (
+                                        <p>Loading posts...</p>
+                                    ) : (
+                                        
+                                        posts.map((post, index) => {
+                                            if (!post || !post._id || !post.author) {
+                                                console.error(`Invalid post at index ${index}:`, post);
+                                                return null; // Skip invalid posts
+                                            }
+                                            return (
+                                            
+                                            <div key={post._id} className="post-item">
+                                                < hr />
+                                                <div>
+                                                    <div className="author-details">
+                                                        <img src={post.author && post.author.profilePicture ? `http://localhost:5000${post.author.profilePicture}` : '/images/default.jpg'} alt="author" className='author-pic'></img> 
+                                                        <div className="author-name">
+                                                            <strong>{post.author ? post.author.name : 'Unknown Author' }</strong>    
+                                                        </div>
+                                                    </div>
+                                                    <p>{post.author ?  post.content.text : 'text'}</p>
+    
+                                                    <div className="image">
+                                                    {post.content && post.content.image &&(
+                                                        <img src={`http://localhost:5000${post.content.image}`} alt="Post" className='post-image'/>
+                                                    )}
+                                                    </div>
+                                                    
+                                                    </div>
+                                                    <div className='like-comment'>
+                                                        <div className="like">
+                                                            <button onClick={() => handleLikePost(post._id) } className="like-button">
+                                                            <img src="/images/like-icon.png" alt="Like" className='like-icon'/> 
+                                                            ({post.likes ? post.likes.length: 0})
+                                                            </button>
+                                                        </div>
+                                                        
+                                                        
+                                                        
+    
+                                                    <div className='comment'>
+                                                        <div className="comment-button">
+                                                        <button 
+                                                        onClick={() => toggleCommentsVisibility(post._id)} 
+                                                        className="comment-icon-button"
+                                                        >
+                                                            <img src="/images/comment-icon.png" alt="Comment" className="comment-icon"/> 
+                                                        </button>
+                                                        </div>
+                                                        
+                                                        <div className="comment-list">
+                                                        {post.showComments && (
+                                                        <div className="comments">
+                                                            <h4>Comments</h4>
+                                                            {post.comments ? (
+                                                                post.comments.map((comment) => (
+                                                                    <div key={comment._id}>
+                                                                        <strong>{comment.commenter?.name || 'Unknown'}</strong>: {comment.text}
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <p>No comments yet.</p> /* Added fallback for undefined */
+                                                            )}
+                                                            <textarea
+                                                                placeholder="Add a comment"
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        handleAddComment(post._id, e.target.value);
+                                                                        e.target.value = '';
+                                                                    }
+                                                                }}
+                                                            ></textarea>
+                                                            <hr />
+                                                        </div>
+                                                    )}
+                                                        </div>
+                                                        
+                                                    </div>
+                                                    <div className="delete">
+                                                    {post.author._id === user._id && (
+                                                        <button className="delete-button" onClick={() => handleDeletePost(post._id)}> 
+                                                           <img src="/images/delete-icon.png" alt="" className='delete-post-icon' />
+                                                        </button>
+                                                      )}   
+                                                        </div>
+                                                </div>
+                                                    
+                                            </div>
+                                            );
+                                        }
+                                    )
+                )}
+                                </div>
                                 
                             </div>
                             
-                            <div className="your-posts">
-                            <hr />
+                    </div>
+                    <div className="conversations-section">
+                            
+                            <div className="conversations-list">
+                            <img 
+                                        src='./images/inbox.png'
+                                        alt='inbox'
+                                        className='inbox-icon'
+                                        />
+                                <h3>Conversations</h3> 
                                 
-                                {loadingPosts ? (
-                                    <p>Loading posts...</p>
-                                ) : (
-                                    
-                                    posts.map((post, index) => {
-                                        if (!post || !post._id || !post.author) {
-                                            console.error(`Invalid post at index ${index}:`, post);
-                                            return null; // Skip invalid posts
+                                {conversations && conversations.length > 0 ? (
+                                    <ul>
+                                    {conversations?.map((conv) => {
+                                        if (!conv?._id || !conv.participants) {
+                                            console.error('Conversation data is incomplete:', conv);
+                                            return null;
                                         }
                                         return (
-                                        
-                                        <div key={post._id} className="post-item">
-                                            < hr />
-                                            <div>
-                                                <div className="author-details">
-                                                    <img src={post.author && post.author.profilePicture ? `http://localhost:5000${post.author.profilePicture}` : '/images/default.jpg'} alt="author" className='author-pic'></img> 
-                                                    <div className="author-name">
-                                                        <strong>{post.author ? post.author.name : 'Unknown Author' }</strong>    
-                                                    </div>
-                                                </div>
-                                                <p>{post.author ?  post.content.text : 'text'}</p>
-
-                                                <div className="image">
-                                                {post.content && post.content.image &&(
-                                                    <img src={`http://localhost:5000${post.content.image}`} alt="Post" className='post-image'/>
-                                                )}
-                                                </div>
-                                                
-                                                </div>
-                                                <div className='like-comment'>
-                                                    <div className="like">
-                                                        <button onClick={() => handleLikePost(post._id) } className="like-button">
-                                                        <img src="/images/like-icon.png" alt="Like" className='like-icon'/> 
-                                                        ({post.likes ? post.likes.length: 0})
-                                                        </button>
-                                                    </div>
-                                                    
-                                                    
-                                                    
-
-                                                <div className='comment'>
-                                                    <div className="comment-button">
-                                                    <button 
-                                                    onClick={() => toggleCommentsVisibility(post._id)} 
-                                                    className="comment-icon-button"
-                                                    >
-                                                        <img src="/images/comment-icon.png" alt="Comment" className="comment-icon"/> 
-                                                    </button>
-                                                    </div>
-                                                    
-                                                    <div className="comment-list">
-                                                    {post.showComments && (
-                                                    <div className="comments">
-                                                        <h4>Comments</h4>
-                                                        {post.comments ? (
-                                                            post.comments.map((comment) => (
-                                                                <div key={comment._id}>
-                                                                    <strong>{comment.commenter?.name || 'Unknown'}</strong>: {comment.text}
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <p>No comments yet.</p> /* Added fallback for undefined */
-                                                        )}
-                                                        <textarea
-                                                            placeholder="Add a comment"
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter') {
-                                                                    handleAddComment(post._id, e.target.value);
-                                                                    e.target.value = '';
-                                                                }
-                                                            }}
-                                                        ></textarea>
-                                                        <hr />
-                                                    </div>
-                                                )}
-                                                    </div>
-                                                    
-                                                </div>
-                                                <div className="delete">
-                                                {post.author._id === user._id && (
-                                                    <button className="delete-button" onClick={() => handleDeletePost(post._id)}> 
-                                                       <img src="/images/delete-icon.png" alt="" className='delete-post-icon' />
-                                                    </button>
-                                                  )}   
-                                                    </div>
-                                            </div>
-                                                
-                                        </div>
-                                        );
-                                    }
-                                )
-            )}
-                            </div>
-                            
-                        </div>
-                        
-                </div>
-                <div className="conversations-section">
-                        
-                        <div className="conversations-list">
-                        <img 
-                                    src='./images/inbox.png'
-                                    alt='inbox'
-                                    className='inbox-icon'
-                                    />
-                            <h3>Conversations</h3> 
-                            
-                            {conversations && conversations.length > 0 ? (
-                                <ul>
-                                {conversations.map((conv) => {
-                                    if (!conv._id || !conv.participants) {
-                                        console.error('Conversation data is incomplete:', conv);
-                                        return null;
-                                    }
-                                    return (
-                                    <li
-                                        key={conv._id}
-                                        className={`conversation-item ${selectedConversation?._id === conv._id ? 'active' : ''}`}
-                                        onClick={() => {
-                                            console.log('Conversation clicked:', conv);
-                                            setSelectedConversation(conv);
-                                            fetchMessages(conv._id);
-                                        }}
-                                    >
-                                    <p><strong>{(conv.participants || []).map(participant => participant.name).join(', ')}</strong></p>
-                                    {/* <button onClick={() => deleteConversation(conv._id)} className="delete-conversation-button">
-                                        Delete
-                                    </button> */}
-                                    <img
-                                    src='/images/delete-icon.png'
-                                    alt='Delete conversation'
-                                    className='delete-conversation'
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // Prevent triggering the parent onClick
-                                        deleteConversation(conv._id);}
-                                    }
-                                    />
-                                    </li>
-                                    );
-                                })}
-                                </ul>
-                            ) : (
-                                <p>No conversations found.</p>
-                            )}
-                        </div>
-
-                        <div className="messages-section">
-                            {/* Send a Message Section */}
-                            <div className="message-icon-section"  onClick={handleInboxClick}>
-                                    <h3>Send a new Message</h3>
-                                    
-                                    <select
-                                        value={selectedFriend || ""}
-                                        onChange={(e) => setSelectedFriend(e.target.value)}
-                                        className="friend-select"
-                                    >
-                                        <option value="">Select a Friend</option>
-                                        {friends.map((friend) => (
-                                            <option key={friend._id} value={friend._id}>
-                                                {friend.name}
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    <textarea
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Type message here..."
-                                        className="message-textarea"
-                                    ></textarea>
-                                    <button
-                                        onClick={handleSendMessage}
-                                        disabled={!selectedFriend || !newMessage}
-                                        className="send-button"
-                                    >
-                                    Send
-                                    </button>
-
-                                    {/* <img
-                                    src='/images/send-icon.png'
-                                    alt='send-message'
-                                    className='send-button'
-                                    onClick={(e)=> {
-                                        e.stopPropagation();
-                                        
-                                        if (selectedFriend && newMessage) {
-                                            handleSendMessage();
-                                        }
-                                    } } /> */}
-                            </div>
-                            <hr />
-                        <div className='conv-preview'>
-                        < hr />
-                        {selectedConversation ? (
-                            <>
-                            <h3>
-                                Messages with  <br></br>
-                                {selectedConversation?.participants?.find(participant => participant._id !== user._id)?.name || 'Unknown'}
-                            </h3>
-                            <div className="messages-list">
-                                {Array.isArray(messages) && messages.length > 0 ? (
-                                messages.map((msg) => {
-                                    if (!msg || !msg.sender) {
-                                        console.error('Invalid message or missing sender:', msg);
-                                        return null; // Skip invalid messages
-                                    }
-                                    return (
-                                        <div
-                                            key={msg._id}
-                                            className={`message-item ${msg.sender._id === user._id ? "sent" : "received"}`}
-                                        >
-                                            <p>{msg.content}</p>
-                                            {msg.sender._id === user._id && ( // Only allow deletion for sender
-                                            // <button onClick={() => deleteMessage(msg._id)} className="delete-button">
-                                            //     🗑️
-                                            // </button>
-                                            <img 
-                                            src='/images/delete-icon.png'
-                                            alt='delete message'
-                                            className='delete-msg'
-                                            onClick={(e)=>{
-                                                e.stopPropagation();
-                                                deleteMessage(msg._id)
+                                        <li
+                                            key={conv._id}
+                                            className={`conversation-item ${selectedConversation?._id === conv._id ? 'active' : ''}`}
+                                            onClick={() => {
+                                                console.log('Conversation clicked:', conv);
+                                                setSelectedConversation(conv);
+                                                fetchMessages(conv._id);
                                             }}
-                                            />
-                                            )}
-                                        </div>
-                                    );
-                                })
+                                        >
+                                        <p><strong>{conv.participants?.map(participant => participant.name).join(', ') || "Unknown participants"}</strong></p>
+                                        {/* <button onClick={() => deleteConversation(conv._id)} className="delete-conversation-button">
+                                            Delete
+                                        </button> */}
+                                        <img
+                                        src='/images/delete-icon.png'
+                                        alt='Delete conversation'
+                                        className='delete-conversation'
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent triggering the parent onClick
+                                            deleteConversation(conv._id);}
+                                        }
+                                        />
+                                        </li>
+                                        );
+                                    })}
+                                    </ul>
                                 ) : (
-                                <p>No messages yet.</p>
+                                    <p>No conversations found.</p>
                                 )}
                             </div>
-                            <div className="message-input">
-                                <textarea
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                placeholder="Type a message..."
-                                />
-                                {/* <img
-                                    src='/images/send-icon.png'
-                                    alt='send-message'
-                                    className='send-button'
-                                    onClick={(e)=> {
-                                        e.stopPropagation();
+    
+                            <div className="messages-section">
+                                {/* Send a Message Section */}
+                                <div className="message-icon-section"  onClick={handleInboxClick}>
+                                        <h3>Send a new Message</h3>
                                         
-                                        if (selectedFriend && newMessage) {
-                                            handleSendMessage();
+                                        <select
+                                            value={selectedFriend || ""}
+                                            onChange={(e) => setSelectedFriend(e.target.value)}
+                                            className="friend-select"
+                                        >
+                                            <option value="">Select a Friend</option>
+                                            {friends.map((friend) => (
+                                                <option key={friend._id} value={friend._id}>
+                                                    {friend.name}
+                                                </option>
+                                            ))}
+                                        </select>
+    
+                                        <textarea
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            placeholder="Type message here..."
+                                            className="message-textarea"
+                                        ></textarea>
+                                        <button
+                                            onClick={handleSendMessage}
+                                            disabled={!selectedFriend || !newMessage}
+                                            className="send-button"
+                                        >
+                                        Send
+                                        </button>
+    
+                                        {/* <img
+                                        src='/images/send-icon.png'
+                                        alt='send-message'
+                                        className='send-button'
+                                        onClick={(e)=> {
+                                            e.stopPropagation();
+                                            
+                                            if (selectedFriend && newMessage) {
+                                                handleSendMessage();
+                                            }
+                                        } } /> */}
+                                </div>
+                                <hr />
+                            <div className='conv-preview'>
+                            < hr />
+                            {selectedConversation ? (
+                                <>
+                                <h3>
+                                    Messages with  <br></br>
+                                    {selectedConversation?.participants?.find(participant => participant._id !== user._id)?.name || 'Unknown'}
+                                </h3>
+                                <div className="messages-list">
+                                    {Array.isArray(messages) && messages.length > 0 ? (
+                                    messages.map((msg) => {
+                                        if (!msg || !msg.sender) {
+                                            console.error('Invalid message or missing sender:', msg);
+                                            return null; // Skip invalid messages
                                         }
-                                    } } /> */}
-                                <button onClick={handleSendMessage} className='send-button'>Send</button>
+                                        return (
+                                            <div
+                                                key={msg._id}
+                                                className={`message-item ${msg.sender._id === user._id ? "sent" : "received"}`}
+                                            >
+                                                <p>{msg.content}</p>
+                                                {msg.sender._id === user._id && ( // Only allow deletion for sender
+                                                // <button onClick={() => deleteMessage(msg._id)} className="delete-button">
+                                                //     🗑️
+                                                // </button>
+                                                <img 
+                                                src='/images/delete-icon.png'
+                                                alt='delete message'
+                                                className='delete-msg'
+                                                onClick={(e)=>{
+                                                    e.stopPropagation();
+                                                    deleteMessage(msg._id)
+                                                }}
+                                                />
+                                                )}
+                                            </div>
+                                        );
+                                    })
+                                    ) : (
+                                    <p>No messages yet.</p>
+                                    )}
+                                </div>
+                                <div className="message-input">
+                                    <textarea
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    placeholder="Type a message..."
+                                    />
+                                    {/* <img
+                                        src='/images/send-icon.png'
+                                        alt='send-message'
+                                        className='send-button'
+                                        onClick={(e)=> {
+                                            e.stopPropagation();
+                                            
+                                            if (selectedFriend && newMessage) {
+                                                handleSendMessage();
+                                            }
+                                        } } /> */}
+                                    <button onClick={handleSendMessage} className='send-button'>Send</button>
+                                </div>
+                                </>
+                                ) : (
+                                <p>Select a conversation to view messages.</p>
+                                )}
                             </div>
-                            </>
-                            ) : (
-                            <p>Select a conversation to view messages.</p>
-                            )}
+                            </div>
                         </div>
-                        </div>
-                    </div>
-                </>
-            )}
+                    </>
+                )} </>
+            ):(<p> Navigate to login </p>)}
+
+            
         </div>
     );
 };
