@@ -1,8 +1,10 @@
 // src/pages/Login.js
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContex";
+import "../styles/login.css";
+import Footer from '../components/Footer';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -26,34 +28,60 @@ const Login = () => {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
+        <>
+            <div className="login-container">
+                <div className="auth-wrapper">
+                    <div className="decoration-section">
+                        <div className="circles">
+                            <div className="circle one"></div>
+                            <div className="circle two"></div>
+                            <div className="circle three"></div>
+                        </div>
+                        <div className="content">
+                            <h2>Connect with friends</h2>
+                            <p>Share moments, chat with friends, and stay connected with your loved ones.</p>
+                        </div>
+                    </div>
+                    <div className="login-box">
+                        <h2 className="login-title">Welcome</h2>
+                        {error && <p className="error-message">{error}</p>}
+                        <form onSubmit={handleSubmit} className="login-form">
+                            <div className="form-group">
+                                <label htmlFor="email">Email</label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="password">Password</label>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <button 
+                                type="submit" 
+                                className="login-button"
+                                disabled={!email || !password}
+                            >
+                                Login
+                            </button>
+                        </form>
+                        <p className="register-link">
+                            Don't have an account? <Link to="/register">Register</Link>
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">Login</button>
-            </form>
-            <p>
-                Don't have an account? <a href="/register">Register</a>
-            </p>
-        </div>
+            </div>
+            <Footer />
+        </>
     );
 };
 
