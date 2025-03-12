@@ -255,5 +255,55 @@ const deleteAllSentFriendRequests = async (req, res) => {
   }
 };
 
+// search users by name or email
+const searchUsers = async (req, res) => {
+  try {
+      const { query } = req.query;
+      const currentUserId = req.user.id;
 
-  module.exports = { sendFriendRequest, handleFriendRequest, listFriends, viewFriendRequest, unfriend, viewSentFriendRequests, deleteAllSentFriendRequests };
+      if (!query) {
+          return res.status(400).json({ message: "Search query is required" });
+      }
+
+      // Search users by name or email, excluding the current user
+      const users = await User.find({
+          $and: [
+              {
+                  $or: [
+                      { name: { $regex: query, $options: 'i' } },  // Case-insensitive name search
+                      { email: { $regex: query, $options: 'i' } }  // Case-insensitive email search
+                  ]
+              },
+              { _id: { $ne: currentUserId } }  // Exclude current user
+          ]
+      }).select('name email profilePicture statusMessage');
+
+      if (!users || users.length === 0) {
+          return res.status(404).json({ message: "No users found matching your search" });
+      }
+
+      res.status(200).json({
+          count: users.length,
+          users: users
+      });
+
+  } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ 
+          message: "Error searching users",
+          error: error.message 
+      });
+  }
+};
+
+
+module.exports = { 
+  sendFriendRequest, 
+  handleFriendRequest, 
+  listFriends, 
+  viewFriendRequest, 
+  unfriend, 
+  viewSentFriendRequests, 
+  deleteAllSentFriendRequests,
+  searchUsers  
+};
