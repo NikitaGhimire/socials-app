@@ -52,69 +52,91 @@ const sendFriendRequest = async (req, res) => {
   //accept/reject/delete friend request
   const handleFriendRequest = async (req, res) => {
     const receiverId = req.user.id;
-    const { senderId, action } = req.body; // `action` can be "accept" or "reject"
-  
-    console.log(`${action.charAt(0).toUpperCase() + action.slice(1)}ing friend request:`);
-    console.log("Receiver ID (current user):", receiverId);
-    console.log("Sender ID (from request body):", senderId);
-  
-    try {
-      // Ensure receiverId and senderId are ObjectId instances
-      const receiverObjectId = new mongoose.Types.ObjectId(receiverId);
-      const senderObjectId = new mongoose.Types.ObjectId(senderId);
-  
-      // Find the friend request
-      const request = await FriendRequest.findOne({
-        sender: senderObjectId,
-        receiver: receiverObjectId,
-        status: "pending",
-      });
-  
-      console.log("Friend request found:", request);
-  
-      if (!request) {
-        return res.status(404).json({ message: "Friend request not found" });
-      }
-  
-      if (action === "accept") {
-        // Update the status to "accepted"
-        request.status = "accepted";
-        await request.save();
-  
-        // Add the sender and receiver to each other's friend lists
-        const sender = await User.findById(senderObjectId);
-        const receiver = await User.findById(receiverObjectId);
-  
-        if (!sender || !receiver) {
-          return res.status(404).json({ message: "Sender or receiver not found" });
-        }
-  
-        sender.friends.push(receiverObjectId);
-        receiver.friends.push(senderObjectId);
-  
-        await sender.save();
-        await receiver.save();
-  
-        res.status(200).json({ message: "Friend request accepted" });
-      } else if (action === "reject") {
-        // Update the status to "rejected"
-        request.status = "rejected";
-        await request.save();
-  
-        res.status(200).json({ message: "Friend request rejected" });
-      } else if (action === "delete") {
-        // Delete the pending friend request
-        await FriendRequest.deleteOne({ _id: request._id });
-  
-        res.status(200).json({ message: "Friend request deleted successfully" });
-      } else {
-        res.status(400).json({ message: "Invalid action" });
-      }
-    } catch (error) {
-      console.error(`Error handling friend request (${action}):`, error);
-      res.status(500).json({ message: error.message });
+    const { requestId, action } = req.body;
+
+    // Validation
+    if (!requestId || !action) {
+        return res.status(400).json({ 
+            message: "Missing required parameters",
+            received: { requestId, action }
+        });
     }
-  };
+
+    if (!['accept', 'reject'].includes(action)) {
+        return res.status(400).json({ 
+            message: "Invalid action. Must be 'accept' or 'reject'" 
+        });
+    }
+
+    try {
+        // Find the friend request by its ID
+        const request = await FriendRequest.findById(requestId);
+
+        if (!request) {
+            return res.status(404).json({ message: "Friend request not found" });
+        }
+
+        // Verify that the current user is the receiver of this request
+        if (request.receiver.toString() !== receiverId) {
+            return res.status(403).json({ message: "Unauthorized to handle this request" });
+        }
+
+        if (action === "accept") {
+            // Update the status to "accepted"
+            request.status = "accepted";
+            await request.save();
+
+            // Add users to each other's friend lists
+            const sender = await User.findById(request.sender);
+            const receiver = await User.findById(receiverId);
+
+            if (!sender || !receiver) {
+                return res.status(404).json({ message: "User not found" });
+            }
+
+            // Check if they're not already friends
+            if (!sender.friends.includes(receiverId)) {
+                sender.friends.push(receiverId);
+            }
+            if (!receiver.friends.includes(request.sender)) {
+                receiver.friends.push(request.sender);
+            }
+
+            await Promise.all([sender.save(), receiver.save()]);
+
+            // Return the new friend's details
+            res.status(200).json({
+                success: true,
+                message: "Friend request accepted",
+                newFriend: {
+                    _id: sender._id,
+                    name: sender.name,
+                    email: sender.email,
+                    profilePicture: sender.profilePicture,
+                    statusMessage: sender.statusMessage
+                }
+            });
+
+        } else if (action === "reject") {
+            request.status = "rejected";
+            await request.save();
+            
+            res.status(200).json({
+                success: true,
+                message: "Friend request rejected"
+            });
+        } else {
+            res.status(400).json({ message: "Invalid action" });
+        }
+
+    } catch (error) {
+        console.error(`Error handling friend request:`, error);
+        res.status(500).json({ 
+            message: "Internal server error",
+            error: error.message 
+        });
+    }
+};
   
 
   const viewFriendRequest = async (req, res) => {
