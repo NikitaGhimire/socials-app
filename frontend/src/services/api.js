@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://messaging-app-zyja.onrender.com/api" || "http://localhost:5000/api",
+    baseURL: process.env.REACT_APP_API_BASE_URL || "http://localhost:5000/api",
     headers: {
     'Content-Type': 'application/json',
 }, // Your backend API
