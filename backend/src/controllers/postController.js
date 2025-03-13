@@ -91,30 +91,30 @@ const deletePost = async (req, res) => {
   }
 };
 
-// Add a like to a post
-const likePost = async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const userId = req.user._id;
+// // Add a like to a post
+// const likePost = async (req, res) => {
+//   try {
+//     const { postId } = req.params;
+//     const userId = req.user._id;
 
-    const post = await Post.findById(postId);
+//     const post = await Post.findById(postId);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
+//     if (!post) {
+//       return res.status(404).json({ message: "Post not found" });
+//     }
 
-    if (post.likes.includes(userId)) {
-      return res.status(400).json({ message: "Already liked this post" });
-    }
+//     if (post.likes.includes(userId)) {
+//       return res.status(400).json({ message: "Already liked this post" });
+//     }
 
-    post.likes.push(userId);
-    await post.save();
+//     post.likes.push(userId);
+//     await post.save();
 
-    res.status(200).json(post);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to like post", error });
-  }
-};
+//     res.status(200).json(post);
+//   } catch (error) {
+//     res.status(500).json({ message: "Failed to like post", error });
+//   }
+// };
 
 // Add a comment to a post
 const addComment = async (req, res) => {
@@ -168,5 +168,57 @@ const viewPosts = async (req, res) => {
     }
   };
   
+const toggleLike = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const userId = req.user._id;
 
-module.exports = { addComment, createPost, updatePost, likePost, viewPosts, deletePost};
+        if (!postId || !userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Post ID and User ID are required"
+            });
+        }
+
+        const post = await Post.findById(postId);
+        
+        if (!post) {
+            return res.status(404).json({
+                success: false,
+                message: "Post not found"
+            });
+        }
+
+        // Initialize likes array if it doesn't exist
+        if (!post.likes) {
+            post.likes = [];
+        }
+
+        const userLikeIndex = post.likes.indexOf(userId);
+        
+        if (userLikeIndex === -1) {
+            // User hasn't liked the post yet, add like
+            post.likes.push(userId);
+        } else {
+            // User has already liked the post, remove like
+            post.likes.splice(userLikeIndex, 1);
+        }
+
+        await post.save();
+
+        return res.status(200).json({
+            success: true,
+            likes: post.likes,
+            message: userLikeIndex === -1 ? 'Post liked' : 'Post unliked'
+        });
+
+    } catch (error) {
+        console.error('Toggle like error:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Error processing like"
+        });
+    }
+};
+
+module.exports = { addComment, createPost, updatePost, viewPosts, deletePost, toggleLike};

@@ -11,12 +11,13 @@ const postSchema = new mongoose.Schema(
       text: { type: String, default: "" },
       image: { type: String }, // Path to uploaded image
     },
-    likes: [
-      {
+    likes: {
+      type: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+        ref: "User"
+      }],
+      default: [] // Initialize as empty array
+    },
     comments: [
       {
         commenter: {
@@ -46,5 +47,21 @@ postSchema.pre("save", async function (next) {
   }
   next();
 });
+
+// method to handle likes
+postSchema.methods.toggleLike = function(userId) {
+  // Convert userId to string for comparison
+  const userIdStr = userId.toString();
+  
+  // Convert ObjectIds to strings for comparison
+  const likeIndex = this.likes.findIndex(id => id.toString() === userIdStr);
+  
+  if (likeIndex === -1) {
+    this.likes.push(userId);
+  } else {
+    this.likes.splice(likeIndex, 1);
+  }
+  return this.save();
+};
 
 module.exports = mongoose.model("Post", postSchema);
