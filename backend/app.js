@@ -12,6 +12,9 @@ const postRoutes = require("./src/routes/postRoutes");
 const app = express();
 
 // Middleware
+// Allow CORS for preflight requests
+app.options('*', cors()); // Handle preflight requests for all routes
+
 app.use(cors({ origin: [
   "http://localhost:3000", 
   "https://messaging-app-ebon-two.vercel.app/"
