@@ -17,7 +17,7 @@ app.options('*', cors()); // Handle preflight requests for all routes
 
 app.use(cors({ origin: [
   "http://localhost:3000", 
-  "https://messaging-app-ebon-two.vercel.app/"
+  "https://messaging-app-ebon-two.vercel.app"
 ],
 methods: "GET, POST, PUT, DELETE",
 allowedHeaders: "Content-Type, Authorization"
