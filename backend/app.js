@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./src/config/db"); // Import the DB connection function
@@ -15,13 +14,15 @@ const app = express();
 // Allow CORS for preflight requests
 app.options('*', cors()); // Handle preflight requests for all routes
 
-app.use(cors({ origin: [
-  "http://localhost:3000", 
-  "https://messaging-app-ebon-two.vercel.app"
-],
-methods: "GET, POST, PUT, DELETE",
-allowedHeaders: "Content-Type, Authorization"
- })); // Enable CORS for all requests
+app.use(cors({
+    origin: [
+        "http://localhost:3000",
+        "https://messaging-app-ebon-two.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
+})); // Enable CORS for all requests
 app.use(express.json()); // Parse incoming JSON requests
 
 // Serve static files from the "src/uploads" folder
