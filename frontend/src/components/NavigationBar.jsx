@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/navigationBar.css';
 
 const NavigationBar = ({ 
@@ -12,6 +12,19 @@ const NavigationBar = ({
     onSearchChange,
     handleSearch
 }) => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (isMenuOpen && !event.target.closest('.nav-right') && !event.target.closest('.menu-toggle')) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isMenuOpen]);
+
     return (
         <nav className="navigation-bar">
             <div className="nav-left">
@@ -29,17 +42,19 @@ const NavigationBar = ({
                 </div>
             </div>
 
-            <div className="nav-right">
-                <button className="nav-icon-button" onClick={onFriendsClick}>
-                    <img src="/images/friend.png" alt="Friends" className="nav-icon" />
-                </button>
-                <button className="nav-icon-button" onClick={onRequestsClick}>
-                    <img src="/images/request.png" alt="Requests" className="nav-icon" />
-                </button>
-                <button className="nav-icon-button" onClick={onConversationsClick}>
-                    <img src="/images/inbox.png" alt="Messages" className="nav-icon" />
-                </button>
-                <div className="profile-section" onClick={onProfileClick}>
+            <button 
+                className="menu-toggle"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+                <div className="hamburger-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+
+            <div className={`nav-right ${isMenuOpen ? 'show' : ''}`}>
+                <button className="profile-section" onClick={onProfileClick}>
                     <img 
                         src={userProfile?.profilePicture ? 
                             `http://localhost:5000${userProfile.profilePicture}` : 
@@ -47,8 +62,29 @@ const NavigationBar = ({
                         }
                         alt="Profile"
                         className="nav-profile-pic"
+                        loading="lazy"
+                        width="36"
+                        height="36"
                     />
-                </div>
+                    <div className="profile-info">
+                        <span className="user-name">{userProfile?.name || 'User'}</span>
+                        <span className="nav-label">Profile</span>
+                    </div>
+                </button>
+
+                <button className="nav-icon-button" onClick={onFriendsClick}>
+                    <img src="/images/friend.png" alt="Friends" className="nav-icon" />
+                    <span className="nav-label">Friends</span>
+                </button>
+                <button className="nav-icon-button" onClick={onRequestsClick}>
+                    <img src="/images/request.png" alt="Requests" className="nav-icon" />
+                    <span className="nav-label">Requests</span>
+                </button>
+                <button className="nav-icon-button" onClick={onConversationsClick}>
+                    <img src="/images/inbox.png" alt="Messages" className="nav-icon" />
+                    <span className="nav-label">Messages</span>
+                </button>
+                
             </div>
         </nav>
     );
