@@ -64,7 +64,7 @@ const loginUser = async (req, res) => {
 
 // Get user profile (protected route)
 const getUserProfile = async (req, res) => {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select('name email profilePicture statusMessage');
     if (user) {
         res.json(user);
     } else {
