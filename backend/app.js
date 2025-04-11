@@ -6,7 +6,7 @@ const userRoutes = require("./src/routes/userRoutes");
 const friendRoutes = require("./src/routes/friendRoutes");
 const messageRoutes = require("./src/routes/messageRoutes");
 const postRoutes = require("./src/routes/postRoutes");
-
+const compression = require('compression');
 
 const app = express();
 
@@ -25,8 +25,16 @@ app.use(cors({
 })); // Enable CORS for all requests
 app.use(express.json()); // Parse incoming JSON requests
 
+app.use(compression()); // Enable compression for responses
+
 // Serve static files from the "src/uploads" folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// cache control middleware
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+  next();
+});
 
 // Database connection
 connectDB(); // Connect to MongoDB
