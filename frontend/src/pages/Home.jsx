@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContex';
 import api from '../services/api';
 import '../styles/home.css';
-import NavigationBar from '../components/NavigationBar';
-import Footer from '../components/Footer';
+
+const NavigationBar = lazy(() => import('../components/NavigationBar'));
+const Footer = lazy(() => import('../components/Footer'));
 
 const Home = () => {
     const { user, logout } = useAuth();
@@ -223,18 +224,32 @@ const Home = () => {
             if (response.data?.message && response.data?.conversation) {
                 const { message, conversation } = response.data;
 
-                // Add the new message to the messages list with sender info
+                // Add the new message to the messages list
                 setMessages(prevMessages => [...prevMessages, {
                     ...message,
                     sender: { _id: user._id },
-                    _id: message._id // Ensure message has an ID for deletion
+                    _id: message._id
                 }]);
 
-                // Update conversations list with new conversation
+                // Update conversations list with new lastMessage
+                setConversations(prevConversations => {
+                    return prevConversations.map(conv => {
+                        if (conv._id === (conversationId || conversation._id)) {
+                            return {
+                                ...conv,
+                                lastMessage: newMessage // Update the lastMessage
+                            };
+                        }
+                        return conv;
+                    });
+                });
+
+                // If it's a new conversation, add it to the list
                 if (!conversationId) {
                     const selectedFriendData = friends.find(f => f._id === selectedFriend);
                     const newConversation = {
                         ...conversation,
+                        lastMessage: newMessage,
                         participants: [
                             { _id: user._id, name: user.name },
                             { _id: selectedFriend, name: selectedFriendData?.name }
@@ -538,7 +553,7 @@ const Home = () => {
     }, [showOptions]);
 
     return (
-        <>
+        <Suspense fallback={<div>Loading...</div>}>
             <div className="home-container">
                 <NavigationBar 
                     onProfileClick={handleProfileClick}
@@ -835,190 +850,160 @@ const Home = () => {
 
                             {/* Chat/Conversations Popup */}
                             {isChatVisible && (
-                                <div className={`chat-popup ${isChatMinimized ? 'minimized' : ''}`}>
-                                    <div className="chat-header">
-                                        <h3>Messages</h3>
-                                        <div className="chat-controls">
-                                            <button 
-                                                className="minimize-button"
-                                                onClick={() => setIsChatMinimized(!isChatMinimized)}
-                                            >
-                                                {isChatMinimized ? '▲' : '▼'}
-                                            </button>
-                                            <button 
-                                                className="close-button"
-                                                onClick={() => setIsChatVisible(false)}
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="chat-container">
-                                        {/* Left side - Conversations list */}
-                                        <div className="conversations-list">
-                                            <div className="new-message-section">
-                                                <h4>New Message</h4>
-                                                <select
-                                                    value={selectedFriend || ""}
-                                                    onChange={(e) => setSelectedFriend(e.target.value)}
-                                                    className="friend-select"
+                                <div className="popup-overlay chat-overlay" onClick={() => setIsChatVisible(false)}>
+                                    <div 
+                                        className={`popup-content chat-popup ${isChatMinimized ? 'minimized' : ''}`}
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <div className="chat-header">
+                                            <h3>Messages</h3>
+                                            <div className="chat-controls">
+                                                <button 
+                                                    className="minimize-button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setIsChatMinimized(!isChatMinimized);
+                                                    }}
                                                 >
-                                                    <option value="">Select a Friend</option>
-                                                    {friends.map((friend) => (
-                                                        <option key={friend._id} value={friend._id}>
-                                                            {friend.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                    {isChatMinimized ? '▲' : '▼'}
+                                                </button>
+                                                <button 
+                                                    className="close-button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setIsChatVisible(false);
+                                                    }}
+                                                >
+                                                    ×
+                                                </button>
                                             </div>
-                                            <div className="conversations">
-                                                {conversations && conversations.length > 0 ? (
-                                                    <ul>
-                                                        {conversations.map((conv) => (
-                                                            <li
-                                                                key={conv._id}
-                                                                className={`conversation-item ${selectedConversation?._id === conv._id ? 'active' : ''}`}
-                                                                onClick={() => {
-                                                                    setSelectedConversation(conv);
-                                                                    fetchMessages(conv._id);
-                                                                }}
-                                                            >
-                                                                <div className="conversation-info">
-                                                                    <span>{conv.participants?.find(p => p._id !== user._id)?.name}</span>
-                                                                    <img 
-                                                                        src="/images/option-icon.png" 
-                                                                        alt="options"
-                                                                        className="options-icon"
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            setShowOptions(showOptions === conv._id ? null : conv._id);
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                                {showOptions === conv._id && (
-                                                                    <div 
-                                                                        className="conversation-dropdown"
-                                                                        onClick={e => e.stopPropagation()}
-                                                                    >
+                                        </div>
+                                        {!isChatMinimized && (
+                                            <div className="chat-container">
+                                                <div className="conversations-list">
+                                                    <div className="new-message-section">
+                                                        <h4>New Message</h4>
+                                                        <select
+                                                            value={selectedFriend || ""}
+                                                            onChange={(e) => setSelectedFriend(e.target.value)}
+                                                            className="friend-select"
+                                                        >
+                                                            <option value="">Select a Friend</option>
+                                                            {friends.map((friend) => (
+                                                                <option key={friend._id} value={friend._id}>
+                                                                    {friend.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div className="conversations">
+                                                        {conversations && conversations.length > 0 ? (
+                                                            <ul>
+                                                                {conversations.map((conv) => (
+                                                                    <li key={conv._id} className="conversation-item">
                                                                         <div 
-                                                                            className="dropdown-item delete"
+                                                                            className="conversation-info"
                                                                             onClick={() => {
-                                                                                deleteConversation(conv._id);
-                                                                                setShowOptions(null);
+                                                                                setSelectedConversation(conv);
+                                                                                fetchMessages(conv._id);
                                                                             }}
                                                                         >
-                                                                            <img 
-                                                                                src="/images/delete-icon.png"
-                                                                                alt="delete"
-                                                                                className="delete-icon"
-                                                                            />
-                                                                            <span>Delete Conversation</span>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p>No conversations yet</p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Right side - Messages */}
-                                        <div className="messages-container">
-                                            {selectedConversation || selectedFriend ? (
-                                                <>
-                                                    <div className="selected-chat-header">
-                                                        <h4>
-                                                            {selectedConversation ? 
-                                                                selectedConversation.participants?.find(p => p._id !== user._id)?.name 
-                                                                : 
-                                                                friends.find(f => f._id === selectedFriend)?.name || 'Unknown'}
-                                                        </h4>
-                                                    </div>
-                                                    <div className="messages-list">
-                                                        {Array.isArray(messages) && messages.length > 0 ? (
-                                                            messages.map((msg) => (
-                                                                <div
-                                                                    key={msg._id}
-                                                                    className={`message-item ${msg.sender._id === user._id ? "sent" : "received"}`}
-                                                                >
-                                                                    <div className="message-content">
-                                                                        <p className="message-text">{msg.content}</p>
-                                                                        {msg.sender._id === user._id && (
-                                                                            <div className="message-options">
-                                                                                <img 
-                                                                                    src="/images/option-icon.png" 
-                                                                                    alt="options"
-                                                                                    className="options-icon"
-                                                                                    onClick={() => setShowOptions(msg._id)}
-                                                                                />
-                                                                                {showOptions === msg._id && (
-                                                                                    <div className="options-menu">
-                                                                                        <div 
-                                                                                            className="option-item delete"
-                                                                                            onClick={() => {
-                                                                                                deleteMessage(msg._id);
-                                                                                                setShowOptions(null);
-                                                                                            }}
-                                                                                        >
-                                                                                            <img 
-                                                                                                src="/images/delete-icon.png"
-                                                                                                alt="delete"
-                                                                                                className="delete-icon"
-                                                                                            />
-                                                                                            Delete
+                                                                            {conv.participants
+                                                                                .filter(p => p._id !== user._id)
+                                                                                .map(p => (
+                                                                                    <div key={p._id} className="participant-info">
+                                                                                        <img 
+                                                                                            src={p.profilePicture ? 
+                                                                                                `http://localhost:5000${p.profilePicture}` : 
+                                                                                                '/images/default.jpg'
+                                                                                            } 
+                                                                                            alt={p.name} 
+                                                                                            className="participant-avatar"
+                                                                                        />
+                                                                                        <div className="participant-details">
+                                                                                            <span className="participant-name">{p.name}</span>
+                                                                                            <span className="last-message">{conv.lastMessage || "No messages"}</span>
                                                                                         </div>
                                                                                     </div>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            ))
+                                                                                ))
+                                                                            }
+                                                                        </div>
+                                                                        <button 
+                                                                            className="delete-conversation-btn"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                deleteConversation(conv._id);
+                                                                            }}
+                                                                        >
+                                                                            <img src="/images/delete-icon.png" alt="Delete" className="delete-icon" />
+                                                                        </button>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
                                                         ) : (
-                                                            <p className="no-messages">No messages yet. Start the conversation!</p>
+                                                            <p>No conversations yet</p>
                                                         )}
                                                     </div>
-                                                    <div className="message-input">
-                                                        <textarea
-                                                            value={newMessage}
-                                                            onChange={(e) => setNewMessage(e.target.value)}
-                                                            placeholder="Type a message..."
-                                                            onKeyPress={(e) => {
-                                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                                    e.preventDefault();
-                                                                    handleSendMessage();
-                                                                }
-                                                            }}
-                                                        />
-                                                        <button 
-                                                            onClick={handleSendMessage}
-                                                            disabled={!newMessage.trim()}
-                                                            className='send-button'
-                                                            aria-label="Send message"
-                                                        >
-                                                            <img 
-                                                                src="/images/send-icon.png" 
-                                                                alt="Send" 
-                                                                className="send-icon"
-                                                            />
-                                                        </button>
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <div className="no-chat-selected">
-                                                    <p>Select a conversation or start a new one</p>
                                                 </div>
-                                            )}
-                                        </div>
+                                            
+                                                {/* Right side - Only visible when conversation is selected */}
+                                                {(selectedConversation || selectedFriend) && (
+                                                    <div className="messages-container">
+                                                        <div className="messages-list">
+                                                            {messages.map((message) => (
+                                                                <div 
+                                                                    key={message._id} 
+                                                                    className={`message ${message.sender._id === user._id ? 'sent' : 'received'}`}
+                                                                >
+                                                                    <p>{message.content}</p>
+                                                                    {message.sender._id === user._id && (
+                                                                        <button 
+                                                                            className="delete-message" 
+                                                                            onClick={() => deleteMessage(message._id)}
+                                                                        >
+                                                                            ×
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        
+                                                        <div className="message-input-container">
+                                                            <textarea
+                                                                value={newMessage}
+                                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                                placeholder="Type a message..."
+                                                                onKeyPress={(e) => {
+                                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                                        e.preventDefault();
+                                                                        handleSendMessage();
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <button 
+                                                                onClick={handleSendMessage}
+                                                                disabled={!newMessage.trim()}
+                                                                className="send-message-btn"
+                                                            >
+                                                                Send
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
 
                             {/* Main Content - Posts Section */}
                             <div className="main-content">
+                                <div className="animated-background">
+                                    <div className="shape shape1"></div>
+                                    <div className="shape shape2"></div>
+                                    <div className="shape shape3"></div>
+                                    <div className="shape shape4"></div>
+                                </div>
                                 <div className="post-section">
                                     <button className="create-post-button" onClick={() => setShowCreatePost(true)}>
                                         Create New Post
@@ -1183,7 +1168,7 @@ const Home = () => {
                 
             </div>
             <Footer />
-        </>
+        </Suspense>
     );
 };
 export default Home;
