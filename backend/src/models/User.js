@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema(
     {
         name: { type: String, required: true},
-        email: { type: String, required: true, unique: true},
+        email: { type: String, required: true, unique: true}, // this creates an index automatically
         password: {type: String, required: true},
         profilePicture: { type: String, default: "/uploads/default.jpg"},
         statusMessage: { type: String, default: "Busy"},
@@ -20,8 +20,7 @@ const userSchema = new mongoose.Schema(
     { timestamps: true}
 );
 
-// Add indexes for frequently queried fields
-userSchema.index({ email: 1 });
+// Only keep the name index since email already has an index from unique: true
 userSchema.index({ name: 1 });
 
 // Hash password before saving
