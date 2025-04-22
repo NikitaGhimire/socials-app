@@ -20,8 +20,6 @@ const Home = () => {
     const [newMessage, setNewMessage] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [hoveredUser, setHoveredUser] = useState(null);
-    const [sendMessageVisible, setSendMessageVisible] = useState(false);
     const [friendRequestsVisible, setFriendRequestsVisible] = useState(false);
     const [loading, setLoading] = useState(true);
     const [editingProfile, setEditingProfile] = useState(false);
@@ -425,9 +423,6 @@ const Home = () => {
         }
     };
 
-    const handleInboxClick = () => {
-        setSendMessageVisible(!sendMessageVisible);
-    };
     const handleRequestClick = () => {
         setFriendRequestsVisible(!friendRequestsVisible);
     };
