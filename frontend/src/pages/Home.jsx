@@ -7,6 +7,8 @@ import '../styles/home.css';
 const NavigationBar = lazy(() => import('../components/NavigationBar'));
 const Footer = lazy(() => import('../components/Footer'));
 
+const API_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+
 const Home = () => {
     const { user, logout } = useAuth();
     const [profileVisible, setProfileVisible] = useState(false);
@@ -579,7 +581,10 @@ const Home = () => {
                                         }}>×</button>
                                         <div className="profile-section">
                                             <img 
-                                                src={userProfile?.profilePicture ? `http://localhost:5000${userProfile.profilePicture}` : '/images/default.jpg'}
+                                                src={userProfile?.profilePicture ? 
+                                                    `${API_URL}${userProfile.profilePicture}` : 
+                                                    '/images/default.jpg'
+                                                } 
                                                 alt={userProfile?.name || "User"} 
                                                 className="profile-picture-icon" 
                                             />
@@ -718,7 +723,7 @@ const Home = () => {
                                                         <div className="friend-info">
                                                             <img 
                                                                 src={friend.profilePicture ? 
-                                                                    `http://localhost:5000${friend.profilePicture}` : 
+                                                                    `${API_URL}${friend.profilePicture}` : 
                                                                     '/images/default.jpg'
                                                                 } 
                                                                 alt={friend.name} 
@@ -770,7 +775,7 @@ const Home = () => {
                                                         <div className="request-info">
                                                             <img 
                                                                 src={request.sender?.profilePicture ? 
-                                                                    `http://localhost:5000${request.sender.profilePicture}` : 
+                                                                    `${API_URL}${request.sender.profilePicture}` : 
                                                                     '/images/default.jpg'
                                                                 } 
                                                                 alt={request.sender?.name} 
@@ -817,7 +822,7 @@ const Home = () => {
                                                     <div className="user-info">
                                                         <img 
                                                             src={searchedUser.profilePicture ? 
-                                                                `http://localhost:5000${searchedUser.profilePicture}` : 
+                                                                `${API_URL}${searchedUser.profilePicture}` : 
                                                                 '/images/default.jpg'
                                                             } 
                                                             alt={searchedUser.name} 
@@ -909,7 +914,7 @@ const Home = () => {
                                                                                     <div key={p._id} className="participant-info">
                                                                                         <img 
                                                                                             src={p.profilePicture ? 
-                                                                                                `http://localhost:5000${p.profilePicture}` : 
+                                                                                                `${API_URL}${p.profilePicture}` : 
                                                                                                 '/images/default.jpg'
                                                                                             } 
                                                                                             alt={p.name} 
@@ -1065,7 +1070,7 @@ const Home = () => {
                                                     <div className="author-details">
                                                         <img 
                                                             src={post.author && post.author.profilePicture ? 
-                                                                `http://localhost:5000${post.author.profilePicture}` : 
+                                                                `${API_URL}${post.author.profilePicture}` : 
                                                                 '/images/default.jpg'} 
                                                             alt="author" 
                                                             className='author-pic'
@@ -1082,7 +1087,7 @@ const Home = () => {
                                                         
                                                         {post.content && post.content.image && (
                                                             <img 
-                                                                src={`http://localhost:5000${post.content.image}`} 
+                                                                src={`${API_URL}${post.content.image}`} 
                                                                 alt="Post" 
                                                                 className='post-image'
                                                             />
