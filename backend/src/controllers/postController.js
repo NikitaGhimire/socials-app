@@ -133,7 +133,12 @@ const addComment = async (req, res) => {
     post.comments.push(newComment);
     await post.save();
 
-    res.status(200).json(post);
+    // Populate the newly added comment's commenter field
+    const updatedPost = await Post.findById(postId)
+      .populate("author", "name profilePicture _id")
+      .populate("comments.commenter", "name profilePicture _id");
+
+    res.status(200).json(updatedPost);
   } catch (error) {
     res.status(500).json({ message: "Failed to add comment", error });
   }
