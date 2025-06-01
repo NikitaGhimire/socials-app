@@ -6,8 +6,14 @@ import '../styles/home.css';
 
 const NavigationBar = lazy(() => import('../components/NavigationBar'));
 const Footer = lazy(() => import('../components/Footer'));
+const CreatePost = lazy(() => import('../components/CreatePost'));
+const UserProfile = lazy(() => import ('../components/UserProfile'));
+const FriendList = lazy(() => import ('../components/FriendList'));
+const FriendRequests = lazy(() => import ('../components/FriendRequests'));
+const ChatWindow = lazy(() => import ('../components/ChatWindow'));
+const PostFeed = lazy(() => import ('../components/PostFeed'));
 
-const API_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+export const API_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
 
 const Home = () => {
     const { user, logout } = useAuth();
@@ -29,7 +35,6 @@ const Home = () => {
     const [friendsVisible, setFriendsVisible] = useState(false);
     const searchRef = useRef(null);
     const [loadingPosts, setLoadingPosts] = useState(true);
-    const [newPost, setNewPost] = useState({ text: "", image: null });
     const [showCreatePost, setShowCreatePost] = useState(false);
 
     const [profileUpdates, setProfileUpdates] = useState({
@@ -369,10 +374,6 @@ const Home = () => {
         }
     };
 
-    const handleEditProfile = () => {
-        setEditingProfile(true);
-    };
-
     const handleProfileChange = (e) => {
         console.log("Updating field:", e.target.name, "New value:", e.target.value);
         setProfileUpdates({ ...profileUpdates, [e.target.name]: e.target.value });
@@ -430,7 +431,13 @@ const Home = () => {
     };
 
     //posts
-    const handleCreatePost = async () => {
+    const handleCreatePost = async (newPost) => {
+
+        if (!newPost) {
+            setShowCreatePost(false);
+            return;
+        }
+
         const formData = new FormData();
         formData.append("text", newPost.text);
         if (newPost.image) formData.append("image", newPost.image);
@@ -440,10 +447,8 @@ const Home = () => {
             headers: { "Content-Type": "multipart/form-data" },
            });
 
-           const createdPost = response.data;
-          setPosts([createdPost, ...posts]);
-          setNewPost({ text: "", image: null });
-          console.log("Post created successfully:", createdPost);
+           setPosts((prevPosts) => [response.data, ...prevPosts]);
+           console.log("Post created successfully");
         } catch (error) {
           console.error("Error creating post:", error);
         }
@@ -512,18 +517,30 @@ const Home = () => {
     
       const handleAddComment = async (postId, text) => {
         try {
-          const response = await api.post(
+            const response = await api.post(
             `/posts/${postId}/comment`,
             { text },
             {
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             }
-          );
-          setPosts(posts.map((post) => (post._id === postId ? response.data : post)));
+            );
+
+            const updatedPost = response.data;
+
+            if (!updatedPost._id || !updatedPost.comments) {
+            console.error("Unexpected response shape (not a full post):", updatedPost);
+            return;
+            }
+
+            setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+                post._id === postId ? updatedPost : post
+            )
+            );
         } catch (error) {
-          console.error("Error adding comment:", error);
+            console.error("Error adding comment:", error);
         }
-      };
+    };
 
       const toggleCommentsVisibility = (postId) => {
         setPosts((prevPosts) =>
@@ -570,126 +587,19 @@ const Home = () => {
                         <>
                             {/* Profile Popup */}
                             {showProfileOverlay && (
-                                <div className="popup-overlay" onClick={() => {
-                                    setShowProfileOverlay(false);
-                                    setProfileVisible(false);
-                                }}>
-                                    <div className="popup-content" onClick={e => e.stopPropagation()}>
-                                        <button className="close-button" onClick={() => {
-                                            setShowProfileOverlay(false);
-                                            setProfileVisible(false);
-                                        }}>×</button>
-                                        <div className="profile-section">
-                                            <img 
-                                                src={userProfile?.profilePicture ? 
-                                                    `${API_URL}${userProfile.profilePicture}` : 
-                                                    '/images/default.jpg'
-                                                } 
-                                                alt={userProfile?.name || "User"} 
-                                                className="profile-picture-icon" 
-                                            />
-                                            {!editingProfile ? (
-                                                <div className="profile-details">
-                                                    <p>Name: {userProfile?.name}</p>
-                                                    <p>Email: {userProfile?.email}</p>
-                                                    <p>Bio: {userProfile?.bio}</p>
-                                                    <p>Status: {userProfile?.statusMessage}</p>
-                                                    <button onClick={handleEditProfile} className="edit-profile-button">
-                                                        Edit Profile
-                                                    </button>
-                                                    <button onClick={handleLogout} className="logout-button">Logout</button>
-                                                </div>
-                                            ) : (
-                                                <div className="edit-profile-form">
-    <h2>Edit Profile</h2>
-    
-    <div className="form-group">
-        <label htmlFor="name">Display Name</label>
-        <input
-            type="text"
-            id="name"
-            name="name"
-            value={profileUpdates.name}
-            onChange={handleProfileChange}
-            placeholder="Enter your display name"
-            className="edit-input"
-        />
-    </div>
-
-    <div className="form-group">
-        <label htmlFor="bio">Bio</label>
-        <textarea
-            id="bio"
-            name="bio"
-            value={profileUpdates.bio}
-            onChange={handleProfileChange}
-            placeholder="Tell us about yourself"
-            className="edit-input"
-            rows="4"
-        />
-    </div>
-
-    <div className="form-group">
-        <label htmlFor="statusMessage">Status</label>
-        <input
-            type="text"
-            id="statusMessage"
-            name="statusMessage"
-            value={profileUpdates.statusMessage}
-            onChange={handleProfileChange}
-            placeholder="What's on your mind?"
-            className="edit-input"
-        />
-    </div>
-
-    <div className="form-group">
-        <label>Profile Picture</label>
-        <div className="profile-picture-upload">
-            <label htmlFor="profile-picture" className="upload-label">
-                <img 
-                    src="/images/image-attachment-icon.png" 
-                    alt="Upload" 
-                    className="upload-icon"
-                />
-                <span>Choose a new profile picture</span>
-            </label>
-            <input
-                id="profile-picture"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-            />
-        </div>
-    </div>
-
-    <div className="edit-profile-buttons">
-        <button 
-            onClick={handleProfileUpdate}
-            className="save-button"
-        >
-            Save Changes
-        </button>
-        <button 
-            onClick={() => {
-                setEditingProfile(false);
-                setProfileUpdates({
-                    name: userProfile?.name || '',
-                    bio: userProfile?.bio || '',
-                    statusMessage: userProfile?.statusMessage || '',
-                    profilePicture: null
-                });
-            }}
-            className="cancel-button"
-        >
-            Cancel
-        </button>
-    </div>
-</div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                <UserProfile
+                                    userProfile={userProfile}
+                                    editingProfile={editingProfile}
+                                    profileUpdates={profileUpdates}
+                                    setEditingProfile={setEditingProfile}
+                                    handleProfileChange={handleProfileChange}
+                                    handleProfileUpdate={handleProfileUpdate}
+                                    handleFileChange={handleFileChange}
+                                    handleLogout={handleLogout}
+                                    setShowProfileOverlay={setShowProfileOverlay}
+                                    setProfileVisible={setProfileVisible}
+                                    setProfileUpdates={setProfileUpdates}
+                                />
                             )}
 
                             {/* Search Results Popup */}
@@ -712,102 +622,23 @@ const Home = () => {
 
                             {/* Friends List Popup */}
                             {friendsVisible && (
-                                <div className="popup-overlay" onClick={() => setFriendsVisible(false)}>
-                                    <div className="popup-content" onClick={e => e.stopPropagation()}>
-                                        <button className="close-button" onClick={() => setFriendsVisible(false)}>×</button>
-                                        <h2 className="popup-header">Friends</h2>
-                                        <div className="friends-list">
-                                            {friends.length > 0 ? (
-                                                friends.map((friend) => (
-                                                    <div key={friend._id} className="friend-item">
-                                                        <div className="friend-info">
-                                                            <img 
-                                                                src={friend.profilePicture ? 
-                                                                    `${API_URL}${friend.profilePicture}` : 
-                                                                    '/images/default.jpg'
-                                                                } 
-                                                                alt={friend.name} 
-                                                                className="friend-avatar"
-                                                            />
-                                                            <div className="friend-details">
-                                                                <h4>{friend.name}</h4>
-                                                                <p>{friend.statusMessage || "No status"}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="friend-actions">
-                                                            <button 
-                                                                className="message-friend-btn"
-                                                                onClick={() => {
-                                                                    setSelectedFriend(friend._id);
-                                                                    setIsChatVisible(true);
-                                                                    setFriendsVisible(false);
-                                                                }}
-                                                            >
-                                                                Message
-                                                            </button>
-                                                            <button 
-                                                                className="unfriend-btn"
-                                                                onClick={() => handleUnfriend(friend._id)}
-                                                            >
-                                                                Unfriend
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <p className="no-friends-message">No friends yet</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                <FriendList
+                                    friends={friends}
+                                    setSelectedFriend={setSelectedFriend}
+                                    setIsChatVisible={setIsChatVisible}
+                                    setFriendsVisible={setFriendsVisible}
+                                    handleUnfriend={handleUnfriend}
+                                />
                             )}
 
                             {/* Friend Requests Popup */}
+                                                        
                             {friendRequestsVisible && (
-                                <div className="popup-overlay" onClick={() => setFriendRequestsVisible(false)}>
-                                    <div className="popup-content" onClick={e => e.stopPropagation()}>
-                                        <button className="close-button" onClick={() => setFriendRequestsVisible(false)}>×</button>
-                                        <h2 className="popup-header">Friend Requests</h2>
-                                        <div className="requests-list">
-                                            {friendRequests.length > 0 ? (
-                                                friendRequests.map((request) => (
-                                                    <div key={request._id} className="request-item">
-                                                        <div className="request-info">
-                                                            <img 
-                                                                src={request.sender?.profilePicture ? 
-                                                                    `${API_URL}${request.sender.profilePicture}` : 
-                                                                    '/images/default.jpg'
-                                                                } 
-                                                                alt={request.sender?.name} 
-                                                                className="request-avatar"
-                                                            />
-                                                            <div className="request-details">
-                                                                <h4>{request.sender?.name}</h4>
-                                                                <p>{request.sender?.statusMessage || "No status"}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="request-actions">
-    <button 
-        className="accept-button"
-        onClick={() => handleFriendRequest(request._id, 'accept')}
-    >
-        Accept
-    </button>
-    <button 
-        className="reject-button"
-        onClick={() => handleFriendRequest(request._id, 'reject')}
-    >
-        Reject
-    </button>
-</div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <p className="no-requests-message">No friend requests</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                            <FriendRequests
+                                friendRequests={friendRequests}
+                                handleFriendRequest={handleFriendRequest}
+                                setFriendRequestsVisible={setFriendRequestsVisible}
+                            />
                             )}
 
                             {/* Search Results Popup */}
@@ -849,152 +680,28 @@ const Home = () => {
                             )}
 
                             {/* Chat/Conversations Popup */}
-                            {isChatVisible && (
-                                <div className="popup-overlay chat-overlay" onClick={() => setIsChatVisible(false)}>
-                                    <div 
-                                        className={`popup-content chat-popup ${isChatMinimized ? 'minimized' : ''}`}
-                                        onClick={e => e.stopPropagation()}
-                                    >
-                                        <div className="chat-header">
-                                            <h3>Messages</h3>
-                                            <div className="chat-controls">
-                                                <button 
-                                                    className="minimize-button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setIsChatMinimized(!isChatMinimized);
-                                                    }}
-                                                >
-                                                    {isChatMinimized ? '▲' : '▼'}
-                                                </button>
-                                                <button 
-                                                    className="close-button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setIsChatVisible(false);
-                                                    }}
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        </div>
-                                        {!isChatMinimized && (
-                                            <div className="chat-container">
-                                                <div className="conversations-list">
-                                                    <div className="new-message-section">
-                                                        <h4>New Message</h4>
-                                                        <select
-                                                            value={selectedFriend || ""}
-                                                            onChange={(e) => setSelectedFriend(e.target.value)}
-                                                            className="friend-select"
-                                                        >
-                                                            <option value="">Select a Friend</option>
-                                                            {friends.map((friend) => (
-                                                                <option key={friend._id} value={friend._id}>
-                                                                    {friend.name}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div className="conversations">
-                                                        {conversations && conversations.length > 0 ? (
-                                                            <ul>
-                                                                {conversations.map((conv) => (
-                                                                    <li key={conv._id} className="conversation-item">
-                                                                        <div 
-                                                                            className="conversation-info"
-                                                                            onClick={() => {
-                                                                                setSelectedConversation(conv);
-                                                                                fetchMessages(conv._id);
-                                                                            }}
-                                                                        >
-                                                                            {conv.participants
-                                                                                .filter(p => p._id !== user._id)
-                                                                                .map(p => (
-                                                                                    <div key={p._id} className="participant-info">
-                                                                                        <img 
-                                                                                            src={p.profilePicture ? 
-                                                                                                `${API_URL}${p.profilePicture}` : 
-                                                                                                '/images/default.jpg'
-                                                                                            } 
-                                                                                            alt={p.name} 
-                                                                                            className="participant-avatar"
-                                                                                        />
-                                                                                        <div className="participant-details">
-                                                                                            <span className="participant-name">{p.name}</span>
-                                                                                            <span className="last-message">{conv.lastMessage || "No messages"}</span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                ))
-                                                                            }
-                                                                        </div>
-                                                                        <button 
-                                                                            className="delete-conversation-btn"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                deleteConversation(conv._id);
-                                                                            }}
-                                                                        >
-                                                                            <img src="/images/delete-icon.png" alt="Delete" className="delete-icon" />
-                                                                        </button>
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        ) : (
-                                                            <p>No conversations yet</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            
-                                                {/* Right side - Only visible when conversation is selected */}
-                                                {(selectedConversation || selectedFriend) && (
-                                                    <div className="messages-container">
-                                                        <div className="messages-list">
-                                                            {messages.map((message) => (
-                                                                <div 
-                                                                    key={message._id} 
-                                                                    className={`message ${message.sender._id === user._id ? 'sent' : 'received'}`}
-                                                                >
-                                                                    <p>{message.content}</p>
-                                                                    {message.sender._id === user._id && (
-                                                                        <button 
-                                                                            className="delete-message" 
-                                                                            onClick={() => deleteMessage(message._id)}
-                                                                        >
-                                                                            ×
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                        
-                                                        <div className="message-input-container">
-                                                            <textarea
-                                                                value={newMessage}
-                                                                onChange={(e) => setNewMessage(e.target.value)}
-                                                                placeholder="Type a message..."
-                                                                onKeyPress={(e) => {
-                                                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                                                        e.preventDefault();
-                                                                        handleSendMessage();
-                                                                    }
-                                                                }}
-                                                            />
-                                                            <button 
-                                                                onClick={handleSendMessage}
-                                                                disabled={!newMessage.trim()}
-                                                                className="send-message-btn"
-                                                            >
-                                                                Send
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                           <ChatWindow
+                                user={user}
+                                API_URL={API_URL}
+                                isChatVisible={isChatVisible}
+                                isChatMinimized={isChatMinimized}
+                                setIsChatVisible={setIsChatVisible}
+                                setIsChatMinimized={setIsChatMinimized}
+                                selectedFriend={selectedFriend}
+                                setSelectedFriend={setSelectedFriend}
+                                selectedConversation={selectedConversation}
+                                setSelectedConversation={setSelectedConversation}
+                                friends={friends}
+                                conversations={conversations}
+                                messages={messages}
+                                setMessages={setMessages}
+                                newMessage={newMessage}
+                                setNewMessage={setNewMessage}
+                                fetchMessages={fetchMessages}
+                                handleSendMessage={handleSendMessage}
+                                deleteMessage={deleteMessage}
+                                deleteConversation={deleteConversation}
+                            />
 
                             {/* Main Content - Posts Section */}
                             <div className="main-content">
@@ -1008,156 +715,18 @@ const Home = () => {
                                     <button className="create-post-button" onClick={() => setShowCreatePost(true)}>
                                         Create New Post
                                     </button>
+                                    {showCreatePost && <CreatePost onCreatePost={handleCreatePost} />}
                                     
-                                    {showCreatePost && (
-                                        <div className="popup-overlay" onClick={() => setShowCreatePost(false)}>
-                                            <div className="popup-content" onClick={e => e.stopPropagation()}>
-                                                <button className="close-button" onClick={() => setShowCreatePost(false)}>×</button>
-                                                <h3>Create a New Post</h3>
-                                                <div className="create-post">
-                                                    <textarea
-                                                        value={newPost.text}
-                                                        onChange={(e) => setNewPost({ ...newPost, text: e.target.value })}
-                                                        placeholder="What's on your mind?"
-                                                        className="post-textarea"
-                                                    />
-                                                    <div className="post-actions">
-                                                        <div className="left-actions">
-                                                            <label htmlFor="file-input" className="attachment-icon">
-                                                                <img 
-                                                                    src="/images/image-attachment-icon.png" 
-                                                                    alt="Attachment" 
-                                                                    className="attachment-img"
-                                                                /> 
-                                                                <span>Add Photo</span>
-                                                            </label>
-                                                            <input
-                                                                id='file-input'
-                                                                type="file"
-                                                                accept="image/*"
-                                                                onChange={(e) => setNewPost({ ...newPost, image: e.target.files[0] })}
-                                                                style={{ display: "none" }}
-                                                            />
-                                                        </div>
-                                                        <button 
-                                                            onClick={() => {
-                                                                handleCreatePost();
-                                                                setShowCreatePost(false);
-                                                            }}
-                                                            disabled={!newPost.text.trim() && !newPost.image}
-                                                            className="post-button"
-                                                        >
-                                                            Post
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
                                     
-                                    <div className="your-posts">
-                                        {loadingPosts ? (
-                                            <p>Loading posts...</p>
-                                        ) : (
-                                            posts.map((post, index) => {
-                                                if (!post || !post._id || !post.author) {
-                                                    console.error(`Invalid post at index ${index}:`, post);
-                                                    return null; // Skip invalid posts
-                                                }
-                                                return (
-                                                
-                                                <div key={post._id} className="post-item">
-                                                    <div className="author-details">
-                                                        <img 
-                                                            src={post.author && post.author.profilePicture ? 
-                                                                `${API_URL}${post.author.profilePicture}` : 
-                                                                '/images/default.jpg'} 
-                                                            alt="author" 
-                                                            className='author-pic'
-                                                        />
-                                                        <div className="author-name">
-                                                            <strong>{post.author ? post.author.name : 'Unknown Author'}</strong>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="post-content">
-                                                        {post.content.text && (
-                                                            <p className="post-text">{post.content.text}</p>
-                                                        )}
-                                                        
-                                                        {post.content && post.content.image && (
-                                                            <img 
-                                                                src={`${API_URL}${post.content.image}`} 
-                                                                alt="Post" 
-                                                                className='post-image'
-                                                            />
-                                                        )}
-                                                    </div>
-                                                
-                                                    <div className='like-comment'>
-                                                        <div className="like">
-                                                            <button 
-                                                                onClick={() => handleLikePost(post._id)} 
-                                                                className={`like-button ${post.likes?.includes(user._id) ? 'liked' : ''}`}
-                                                            >
-                                                                <img 
-                                                                    src={post.likes?.includes(user._id) ? '/images/liked-icon.png' : '/images/like-icon.png'} 
-                                                                    alt="Like" 
-                                                                    className='like-icon'
-                                                                /> 
-                                                                ({post.likes ? post.likes.length : 0})
-                                                            </button>
-                                                        </div>
-                                                        
-                                                        <div className='comment'>
-                                                            <button 
-                                                                onClick={() => toggleCommentsVisibility(post._id)} 
-                                                                className="comment-icon-button"
-                                                            >
-                                                                <img src="/images/comment-icon.png" alt="Comment" className="comment-icon"/> 
-                                                            </button>
-                                                        </div>
-
-                                                        {post.author._id === user._id && (
-                                                            <div className="delete">
-                                                                <button className="delete-button" onClick={() => handleDeletePost(post._id)}> 
-                                                                    <img src="/images/delete-icon.png" alt="" className='delete-post-icon' />
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    {/* Comments section */}
-                                                    {post.showComments && (
-                                                        <div className="comments">
-                                                            <h4>Comments</h4>
-                                                            {post.comments ? (
-                                                                post.comments.map((comment) => (
-                                                                    <div key={comment._id}>
-                                                                        <strong>{comment.commenter?.name || 'Unknown'}</strong>: {comment.text}
-                                                                    </div>
-                                                                ))
-                                                            ) : (
-                                                                <p>No comments yet.</p> /* Added fallback for undefined */
-                                                            )}
-                                                            <textarea
-                                                                placeholder="Add a comment"
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter') {
-                                                                        handleAddComment(post._id, e.target.value);
-                                                                        e.target.value = '';
-                                                                    }
-                                                                }}
-                                                            ></textarea>
-                                                            <hr />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                );
-                                            }
-                                        )
-                                        )}
-                                    </div>
+                                    <PostFeed
+                                        posts={posts}
+                                        loadingPosts={loadingPosts}
+                                        handleLikePost={handleLikePost}
+                                        toggleCommentsVisibility={toggleCommentsVisibility}
+                                        handleDeletePost={handleDeletePost}
+                                        handleAddComment={handleAddComment}
+                                        user={user}
+                                    />
                                 </div>
                             </div>
 
