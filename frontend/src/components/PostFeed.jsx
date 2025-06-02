@@ -15,6 +15,11 @@ const PostFeed = ({
       <div className="your-posts">
         {loadingPosts ? (
           <p>Loading posts...</p>
+        ) : posts.length === 0 ? (
+            <div className="no-posts-placeholder">
+                <h3>It's quiet in here...</h3>
+                <p>Be the first to add a post or find friends to see their posts!</p>
+            </div>
         ) : (
           posts.map((post, index) => {
             if (!post || !post._id || !post.author) {

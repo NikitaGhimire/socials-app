@@ -1844,7 +1844,6 @@ textarea.edit-input {
     padding: 20px;
     background: #f8f9fa;
     border-radius: 8px;
-    margin: 20px;
 }
 
 /* No chat selected state */
@@ -2062,14 +2061,8 @@ textarea.edit-input {
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
+    margin-bottom: 15px;
     resize: none;
-    font-size: 14px;
-    transition: border-color 0.2s;
-}
-
-.create-post textarea:focus {
-    outline: none;
-    border-color: #4a6dad;
 }
 
 .create-post .post-actions {
@@ -2571,7 +2564,7 @@ textarea.edit-input {
     justify-content: center;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, background-color 0.2s;
 }
 
 .message:hover .delete-message {
@@ -2760,4 +2753,20 @@ textarea.edit-input {
     width: 16px;
     height: 16px;
     opacity: 0.6;
+}
+
+.no-posts-placeholder {
+  text-align: center;
+  margin-top: 50px;
+  color: #555;
+}
+
+.no-posts-placeholder h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.no-posts-placeholder p {
+  font-size: 16px;
+  color: #777;
 }
