@@ -455,6 +455,9 @@ const Home = () => {
     };
 
     const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
         setProfileVisible(false);
         setFriends([]);
         setFriendRequests([]);
@@ -463,7 +466,9 @@ const Home = () => {
         setSelectedConversation(null);
         setMessages([]);
         setNewMessage('');
+
         navigate('/login');
+        
         logout();
     };
     
