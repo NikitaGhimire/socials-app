@@ -8,7 +8,7 @@ const {
     viewPosts 
 } = require("../controllers/postController");
 const { protect } = require("../middleware/authMiddleware"); 
-const upload = require("../middleware/uploadMiddleware");
+const upload = require("../middleware/cloudinaryUpload");
 
 const router = express.Router();
 
