@@ -10,20 +10,24 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
         try {
             const { data } = await api.post("/users/login", { email, password });
-            // Save the token and user data to localStorage
-            localStorage.setItem("token", data.token);  // Save the token
-            localStorage.setItem("user", JSON.stringify(data));  // Save user data
-            login(data); // Save user data in context
-            navigate("/"); // Redirect to home/dashboard
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data));
+            login(data); 
+            navigate("/");
         } catch (err) {
             setError(err.response?.data?.message || "Something went wrong");
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
@@ -45,6 +49,12 @@ const Login = () => {
                     <div className="login-box">
                         <h2 className="login-title">Welcome</h2>
                         {error && <p className="error-message">{error}</p>}
+                        {loading ? ( 
+                            <div className="loading-message">
+                                <p>Fetching user data from Render backend...</p>
+                                <div className="spinner"></div>
+                            </div>
+                        ) : (
                         <form onSubmit={handleSubmit} className="login-form">
                             <div className="form-group">
                                 <label htmlFor="email">Email</label>
@@ -74,6 +84,7 @@ const Login = () => {
                                 Login
                             </button>
                         </form>
+                        )}
                         <p className="register-link">
                             Don't have an account? <Link to="/register">Register</Link>
                         </p>
