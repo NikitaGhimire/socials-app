@@ -8,7 +8,7 @@ const {
     deleteAllUsers
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
-const upload = require("../middleware/uploadMiddleware");
+const upload = require("../middleware/cloudinaryUpload");
 
 const router = express.Router();
 
