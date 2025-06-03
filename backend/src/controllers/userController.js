@@ -89,7 +89,7 @@ const updateUserProfile = async (req, res) => {
         user.statusMessage = req.body.statusMessage || user.statusMessage;
 
         if (req.file) {
-            user.profilePicture = req.file.path; // Cloudinary returns the file URL in `req.file.path`
+            user.profilePicture = req.file?.path || req.file?.secure_url || user.profilePicture;
         }
 
         const updatedUser = await user.save();
