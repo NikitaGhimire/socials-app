@@ -19,13 +19,13 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: "User already exists" });
         }
 
-        const user = await User.create({ name, email, password, bio: "", statusMessage:"Busy" });
+        const user = await User.create({ name, email, password, bio: "", statusMessage:"Busy", profilePicture: process.env.DEFAULT_CLOUDINARY_PROFILE_PIC });
         if (user) {
             res.status(201).json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                profilePicture: process.env.DEFAULT_CLOUDINARY_PROFILE_PIC,
+                profilePicture: user.profilePicture,
             statusMessage: "Busy", // Default status message
             bio: "", // Default bio (empty)
                 token: generateToken(user._id),
@@ -90,6 +90,10 @@ const updateUserProfile = async (req, res) => {
 
         if (req.file) {
             user.profilePicture = req.file?.path || req.file?.secure_url || user.profilePicture;
+        }
+
+        if (!user.profilePicture) {
+            user.profilePicture = process.env.DEFAULT_CLOUDINARY_PROFILE_PIC;
         }
 
         const updatedUser = await user.save();
