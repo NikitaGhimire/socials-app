@@ -33,6 +33,15 @@ const CreatePost = ({ onCreatePost }) => {
                 onChange={(e) => setNewPost({ ...newPost, image: e.target.files[0] })}
                 style={{ display: 'none' }}
               />
+              {newPost.image && (
+                <div className="image-preview" style={{ marginTop: '10px' }}>
+                  <img 
+                    src={URL.createObjectURL(newPost.image)} 
+                    alt="Preview" 
+                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }}
+                  />
+                </div>
+              )}
             </div>
             <button
               onClick={handleCreatePost}
