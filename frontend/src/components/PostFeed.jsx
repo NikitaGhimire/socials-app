@@ -30,9 +30,10 @@ const PostFeed = ({
               <div key={post._id} className="post-item">
                                                     <div className="author-details">
                                                         <img 
-                                                            src={post.author?.profilePicture 
-                                                                ? post.author.profilePicture
-                                                                : '/images/default.jpg'
+                                                            src={
+                                                                post.author?.profilePicture
+                                                                    ? `${post.author.profilePicture}?v=${post.author._id}`
+                                                                    : '/images/default.jpg'
                                                             }
                                                             alt="author" 
                                                             className='author-pic'
