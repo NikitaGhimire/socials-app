@@ -57,7 +57,7 @@ const NavigationBar = ({
                 <button className="profile-section" onClick={onProfileClick}>
                     <img 
                         src={userProfile?.profilePicture ? 
-                            `http://localhost:5000${userProfile.profilePicture}` : 
+                            `${process.env.REACT_APP_API_BASE_URL?.replace('/api', '')}${userProfile.profilePicture}` : 
                             '/images/default.jpg'
                         }
                         alt="Profile"
