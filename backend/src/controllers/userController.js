@@ -89,7 +89,8 @@ const updateUserProfile = async (req, res) => {
         user.statusMessage = req.body.statusMessage || user.statusMessage;
 
         if (req.file) {
-            user.profilePicture = req.file?.path || req.file?.secure_url || user.profilePicture;
+            const cloudinaryUrl = req.file.secure_url || req.file.path;
+            user.profilePicture = cloudinaryUrl?.startsWith('http') ? cloudinaryUrl : process.env.DEFAULT_CLOUDINARY_PROFILE_PIC;
         }
 
         if (!user.profilePicture) {
