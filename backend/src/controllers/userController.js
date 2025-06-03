@@ -25,7 +25,7 @@ const registerUser = async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                profilePicture: "/uploads/default.jpg", // Default profile picture
+                profilePicture: process.env.DEFAULT_CLOUDINARY_PROFILE_PIC,
             statusMessage: "Busy", // Default status message
             bio: "", // Default bio (empty)
                 token: generateToken(user._id),
@@ -75,35 +75,36 @@ const getUserProfile = async (req, res) => {
 // Update user profile
 const updateUserProfile = async (req, res) => {
     try {
+        console.log("Request body:", req.body);
+        console.log("Uploaded file:", req.file);
+
         const user = await User.findById(req.user.id);
 
-        if (user) {
-            user.name = req.body.name || user.name;
-            user.bio = req.body.bio || user.bio;
-            user.statusMessage = req.body.statusMessage || user.statusMessage;
-
-            // Check if a profile picture URL is provided
-            if (req.file) {
-                user.profilePicture = `/uploads/${req.file.filename}`;
-            } else if (!user.profilePicture) {
-                // If no profile picture exists, use the default one
-                user.profilePicture = '/uploads/default.jpg';
-            }
-
-            const updatedUser = await user.save();
-            res.json({
-                _id: updatedUser._id,
-                name: updatedUser.name,
-                email: updatedUser.email,
-                bio: updatedUser.bio,
-                statusMessage: updatedUser.statusMessage,
-                profilePicture: updatedUser.profilePicture,
-            });
-        } else {
-            res.status(404).json({ message: "User not found" });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
+
+        user.name = req.body.name || user.name;
+        user.bio = req.body.bio || user.bio;
+        user.statusMessage = req.body.statusMessage || user.statusMessage;
+
+        if (req.file) {
+            user.profilePicture = req.file.path; // Cloudinary returns the file URL in `req.file.path`
+        }
+
+        const updatedUser = await user.save();
+
+        res.json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            bio: updatedUser.bio,
+            statusMessage: updatedUser.statusMessage,
+            profilePicture: updatedUser.profilePicture,
+        });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Error updating profile:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };
 

@@ -25,9 +25,10 @@ const UserProfile = ({
         }}>×</button>
         <div className="profile-section">
           <img
-            src={userProfile?.profilePicture
-              ? `${process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000'}${userProfile.profilePicture}`
-              : '/images/default.jpg'}
+            src={userProfile?.profilePicture 
+                ? userProfile.profilePicture
+                : '/images/default.jpg'
+              }
             alt={userProfile?.name || "User"}
             className="profile-picture-icon"
           />

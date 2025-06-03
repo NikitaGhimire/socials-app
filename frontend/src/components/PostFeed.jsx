@@ -30,12 +30,13 @@ const PostFeed = ({
               <div key={post._id} className="post-item">
                                                     <div className="author-details">
                                                         <img 
-                                                            src={post.author && post.author.profilePicture ? 
-                                                                `${API_URL}${post.author.profilePicture}` : 
-                                                                '/images/default.jpg'} 
+                                                            src={post.author?.profilePicture 
+                                                                ? post.author.profilePicture
+                                                                : '/images/default.jpg'
+                                                            }
                                                             alt="author" 
                                                             className='author-pic'
-                                                        />
+                                                        />      
                                                         <div className="author-name">
                                                             <strong>{post.author ? post.author.name : 'Unknown Author'}</strong>
                                                         </div>
@@ -48,10 +49,10 @@ const PostFeed = ({
                                                         
                                                         {post.content && post.content.image && (
                                                             <img 
-                                                                src={`${API_URL}${post.content.image}`} 
+                                                                src={post.content.image} 
                                                                 alt="Post" 
                                                                 className='post-image'
-                                                            />
+                                                                />
                                                         )}
                                                     </div>
                                                 

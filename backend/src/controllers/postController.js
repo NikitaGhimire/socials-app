@@ -9,7 +9,8 @@ const createPost = async (req, res) => {
     const { text } = req.body;
     const userId = req.user?._id; // Assuming user info is available in req.user after authentication
     // Check if an image file was uploaded
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    const image = req.file ? req.file.path : null; 
+    console.log("Uploaded file:", req.file);
     console.log("User ID from request:", userId);
 
     if (!userId) {
@@ -45,7 +46,7 @@ const updatePost = async (req, res) => {
     const userId = req.user._id;
     console.log("Request body:", req.body);
 console.log("Uploaded file:", req.file);
-const image = req.file ? `/uploads/${req.file.filename}` : post.content.image;
+const image = req.file ? req.file.path : post.content.image;
 
 
     const post = await Post.findById(postId);
