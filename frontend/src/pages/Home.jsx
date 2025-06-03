@@ -293,20 +293,22 @@ const Home = () => {
 
         try {
             console.log("Sending formData to /users/update-profile...");
-            const response = await api.put("/users/update-profile", formData, {
+            await api.put("/users/update-profile", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            const updatedUser = response.data;
-            await fetchUserData();  // This fetches the profile and all other user-related data
+            await fetchUserData();  // Refresh state including updated profilePicture
 
-            // Persist the updated user data in localStorage
-            localStorage.setItem("user", JSON.stringify(updatedUser));
+            // Update user data from refetched profile instead of response
+            const updatedProfileResponse = await api.get("/users/profile");
+            if (updatedProfileResponse.status === 200) {
+                localStorage.setItem("user", JSON.stringify(updatedProfileResponse.data));
+            }
 
             alert("Profile updated successfully!");
             setEditingProfile(false);
             // Debug: Check state after reset
-        console.log("Resetting profile updates state.");
+            console.log("Resetting profile updates state.");
             setProfileUpdates({ ...profileUpdates, profilePicture: null });
             // Update user state here instead of reloading the page
         } catch (err) {
