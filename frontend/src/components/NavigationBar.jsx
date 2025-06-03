@@ -57,7 +57,7 @@ const NavigationBar = ({
                 <button className="profile-section" onClick={onProfileClick}>
                     <img 
                         src={userProfile?.profilePicture 
-                            ? userProfile.profilePicture
+                            ? `${userProfile.profilePicture}?t=${Date.now()}`
                             : '/images/default.jpg'
                             }
                         alt="Profile"

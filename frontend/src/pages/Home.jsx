@@ -300,10 +300,12 @@ const Home = () => {
             await fetchUserData();  // Refresh state including updated profilePicture
 
             // Update user data from refetched profile instead of response
-            const updatedProfileResponse = await api.get("/users/profile");
-            if (updatedProfileResponse.status === 200) {
-                localStorage.setItem("user", JSON.stringify(updatedProfileResponse.data));
-            }
+            const response = await api.put("/users/update-profile", formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
+                    });
+
+            setUserProfile(response.data);
+            localStorage.setItem("user", JSON.stringify(response.data));
 
             alert("Profile updated successfully!");
             setEditingProfile(false);

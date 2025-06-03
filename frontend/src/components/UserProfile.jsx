@@ -26,7 +26,7 @@ const UserProfile = ({
         <div className="profile-section">
           <img
             src={userProfile?.profilePicture 
-                ? userProfile.profilePicture
+                ? `${userProfile.profilePicture}?t=${Date.now()}`
                 : '/images/default.jpg'
               }
             alt={userProfile?.name || "User"}
