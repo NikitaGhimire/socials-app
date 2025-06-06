@@ -133,6 +133,6 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 
 ## 👥 Contact
 
-Your Name - nikitaghimire1@gmail.com
+Nikita Ghimiree - nikitaghimire1@gmail.com
 
-Project Link: https://github.com/NikitaGhimire/messaging-app.git
+Project Link: https://github.com/NikitaGhimire/socials-app.git
