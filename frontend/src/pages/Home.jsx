@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContex';
 import api from '../services/api';
-import '../styles/home.css';
+import '../styles/pages/home.css';
 
 const NavigationBar = lazy(() => import('../components/NavigationBar'));
 const Footer = lazy(() => import('../components/Footer'));
@@ -12,6 +12,7 @@ const FriendList = lazy(() => import ('../components/FriendList'));
 const FriendRequests = lazy(() => import ('../components/FriendRequests'));
 const ChatWindow = lazy(() => import ('../components/ChatWindow'));
 const PostFeed = lazy(() => import ('../components/PostFeed'));
+const SearchResults = lazy(() => import('../components/SearchResults'));
 
 export const API_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -50,6 +51,8 @@ const Home = () => {
 
     const [showProfileOverlay, setShowProfileOverlay] = useState(false);
     const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+
+    const [pendingRequests, setPendingRequests] = useState([]);
 
     const navigate = useNavigate();
 
@@ -168,17 +171,12 @@ const Home = () => {
                 params: { query: searchQuery }
             });
 
-            if (response.data && response.data.users) {
-                setSearchResults(response.data.users);
-                setShowSearchOverlay(true);
-            }
+            setSearchResults(response.data.users || []);
+            setShowSearchOverlay(true);
         } catch (err) {
             console.error("Error searching users:", err);
-            if (err.response?.status === 404) {
-                alert("No users found matching your search");
-            } else {
-                alert("Error searching users. Please try again.");
-            }
+            setSearchResults([]);
+            setShowSearchOverlay(true);
         }
     };
 
@@ -280,46 +278,62 @@ const Home = () => {
     };
 
     const handleProfileUpdate = async () => {
-        const formData = new FormData();
-        formData.append("name", profileUpdates.name || user.name);
-        formData.append("bio", profileUpdates.bio || user.bio);
-        formData.append("statusMessage", profileUpdates.statusMessage || user.statusMessage);
-        if (profileUpdates.profilePicture) {
-            console.log("Profile picture file:", profileUpdates.profilePicture);
-            formData.append("profilePicture", profileUpdates.profilePicture);
-        } else {
-            console.log("No profile picture selected for upload.");
-        }
-
         try {
-            console.log("Sending formData to /users/update-profile...");
-            await api.put("/users/update-profile", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
+            const formData = new FormData();
+            formData.append("name", profileUpdates.name || user.name);
+            formData.append("bio", profileUpdates.bio || user.bio);
+            formData.append("statusMessage", profileUpdates.statusMessage || user.statusMessage);
+            
+            if (profileUpdates.profilePicture) {
+                // Check file size
+                if (profileUpdates.profilePicture.size > 5 * 1024 * 1024) {
+                    alert("File size too large. Please choose an image under 5MB");
+                    return;
+                }
+                formData.append("profilePicture", profileUpdates.profilePicture);
+            }
+
+            console.log("Updating profile...");
+            const response = await api.put("/users/update-profile", formData, {
+                headers: { 
+                    "Content-Type": "multipart/form-data"
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    console.log(`Upload Progress: ${percentCompleted}%`);
+                }
             });
 
-            await fetchUserData();  // Refresh state including updated profilePicture
-
-            // Update user data from refetched profile instead of response
-            const response = await api.put("/users/update-profile", formData, {
-                        headers: { "Content-Type": "multipart/form-data" },
-                    });
-
-            setUserProfile(response.data);
-            localStorage.setItem("user", JSON.stringify(response.data));
-
-            alert("Profile updated successfully!");
-            setEditingProfile(false);
-            // Debug: Check state after reset
-            console.log("Resetting profile updates state.");
-            setProfileUpdates({ ...profileUpdates, profilePicture: null });
-            // Update user state here instead of reloading the page
+            if (response.data) {
+                setUserProfile(response.data);
+                localStorage.setItem("user", JSON.stringify(response.data));
+                alert("Profile updated successfully!");
+                setEditingProfile(false);
+                setProfileUpdates({ ...profileUpdates, profilePicture: null });
+            }
         } catch (err) {
             console.error("Error updating profile", err);
+            alert(err.response?.data?.message || "Error updating profile. Please try again.");
         }
     };
 
     const handleFileChange = (e) => {
-        setProfileUpdates({ ...profileUpdates, profilePicture: e.target.files[0] });
+        const file = e.target.files[0];
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert("File size too large. Please choose an image under 5MB");
+                e.target.value = ''; // Clear the file input
+                return;
+            }
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert("Please select an image file");
+                e.target.value = '';
+                return;
+            }
+            setProfileUpdates({ ...profileUpdates, profilePicture: file });
+        }
     };
 
     const sendFriendRequest = async (friendId) => {
@@ -350,6 +364,7 @@ const Home = () => {
             // Log the success response
             console.log("Friend request sent successfully:", response.data);
             alert("Friend request sent!");
+            setPendingRequests(prev => [...prev, friendId]);
             fetchUserData();
         } catch (err) {
             console.error("Error sending friend request:", err);
@@ -369,6 +384,10 @@ const Home = () => {
 
     const isFriend = (friendId) => {
         return friends.some(friend => friend._id === friendId);
+    };
+
+    const isPendingRequest = (userId) => {
+        return pendingRequests.includes(userId);
     };
 
     const handleProfileClick = () => {
@@ -575,16 +594,18 @@ const Home = () => {
         };
     }, [showOptions]);
 
+    console.log('Rendering Home with userProfile:', userProfile);
+
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <div className="home-container">
                 <NavigationBar 
+                    userProfile={userProfile}
                     onProfileClick={handleProfileClick}
                     onSearchClick={() => setSearchResults([])}
                     onFriendsClick={handleFriendsClick}
                     onRequestsClick={handleRequestClick}
                     onConversationsClick={() => setIsChatVisible(!isChatVisible)}
-                    userProfile={userProfile}
                     searchQuery={searchQuery}
                     onSearchChange={(e) => setSearchQuery(e.target.value)}
                     handleSearch={handleSearch}
@@ -612,21 +633,15 @@ const Home = () => {
                             )}
 
                             {/* Search Results Popup */}
-                            {searchResults.length > 0 && showSearchOverlay && (
-                                <div className="popup-overlay" onClick={() => {
-                                    setShowSearchOverlay(false);
-                                    setSearchResults([]);
-                                }}>
-                                    <div className="popup-content" onClick={e => e.stopPropagation()}>
-                                        <button className="close-button" onClick={() => {
-                                            setShowSearchOverlay(false);
-                                            setSearchResults([]);
-                                        }}>×</button>
-                                        <div className="search-section" ref={searchRef}>
-                                            {/* ... existing search content ... */}
-                                        </div>
-                                    </div>
-                                </div>
+                            {showSearchOverlay && (
+                                <SearchResults 
+                                    searchResults={searchResults}
+                                    setShowSearchOverlay={setShowSearchOverlay}
+                                    API_URL={API_URL}
+                                    isFriend={isFriend}
+                                    isPendingRequest={isPendingRequest}
+                                    sendFriendRequest={sendFriendRequest}
+                                />
                             )}
 
                             {/* Friends List Popup */}
@@ -661,12 +676,16 @@ const Home = () => {
                                                 <div key={searchedUser._id} className="search-result-item">
                                                     <div className="user-info">
                                                         <img 
-                                                            src={searchedUser.profilePicture ? 
-                                                                `${API_URL}${searchedUser.profilePicture}` : 
-                                                                '/images/default.jpg'
+                                                            src={searchedUser.profilePicture && searchedUser.profilePicture.includes('cloudinary.com') 
+                                                                ? searchedUser.profilePicture 
+                                                                : '/images/default.jpg'
                                                             } 
                                                             alt={searchedUser.name} 
                                                             className="user-avatar"
+                                                            onError={(e) => {
+                                                                e.target.onerror = null;
+                                                                e.target.src = '/images/default.jpg';
+                                                            }}
                                                         />
                                                         <div className="user-details">
                                                             <h4>{searchedUser.name}</h4>
