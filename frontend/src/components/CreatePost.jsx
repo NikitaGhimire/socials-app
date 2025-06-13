@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../styles/components/CreatePost.css';
 
 const CreatePost = ({ onCreatePost }) => {
   const [newPost, setNewPost] = useState({ text: '', image: null });
