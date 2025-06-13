@@ -1,12 +1,10 @@
-import React from 'react';
+import '../styles/components/ChatWindow.css';
 
 const ChatWindow = ({
   user,
   API_URL,
   isChatVisible,
-  isChatMinimized,
-  setIsChatVisible,
-  setIsChatMinimized,
+  setIsChatVisible,  // Remove isChatMinimized and setIsChatMinimized
   selectedFriend,
   setSelectedFriend,
   selectedConversation,
@@ -27,25 +25,38 @@ const ChatWindow = ({
   const getOtherParticipant = (conv) =>
     conv.participants?.find((p) => p._id !== user._id);
 
+  const handleBackToList = () => {
+    setSelectedConversation(null);
+    setSelectedFriend(null);
+    setMessages([]);
+    setNewMessage('');
+  };
+
+  const isConversationOpen = selectedConversation || selectedFriend;
+
   return (
     <div className="popup-overlay chat-overlay" onClick={() => setIsChatVisible(false)}>
       <div
-        className={`popup-content chat-popup ${isChatMinimized ? 'minimized' : ''}`}
+        className="popup-content chat-popup"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="chat-header">
-          <h3>Messages</h3>
+          {isConversationOpen ? (
+            <div className="chat-header-content">
+              <button className="back-button" onClick={handleBackToList}>
+                ←
+              </button>
+              <h3>
+                {selectedConversation 
+                  ? getOtherParticipant(selectedConversation)?.name 
+                  : friends.find(f => f._id === selectedFriend)?.name}
+              </h3>
+            </div>
+          ) : (
+            <h3>Messages</h3>
+          )}
           <div className="chat-controls">
-            <button
-              className="minimize-button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsChatMinimized(!isChatMinimized);
-              }}
-            >
-              {isChatMinimized ? '▲' : '▼'}
-            </button>
             <button
               className="close-button"
               onClick={(e) => {
@@ -58,9 +69,9 @@ const ChatWindow = ({
           </div>
         </div>
 
-        {!isChatMinimized && (
-          <div className="chat-container">
-            {/* Conversation list + new message dropdown */}
+        <div className="chat-container">
+          {!isConversationOpen ? (
+            // Conversations List View
             <div className="conversations-list">
               <div className="new-message-section">
                 <h4>New Message</h4>
@@ -84,39 +95,38 @@ const ChatWindow = ({
                     {conversations.map((conv) => {
                       const other = getOtherParticipant(conv);
                       return (
-                        <li key={conv._id} className="conversation-item">
-                          <div
-                            className="conversation-info"
-                            onClick={() => {
-                              setSelectedConversation(conv);
-                              setSelectedFriend(null);
-                              fetchMessages(conv._id);
-                            }}
-                          >
-                            <img
-                              src={
-                                other?.profilePicture
-                                  ? `${API_URL}${other.profilePicture}`
-                                  : "/images/default.jpg"
-                              }
-                              alt={other?.name}
-                              className="participant-avatar"
-                            />
-                            <div className="participant-details">
-                              <span className="participant-name">{other?.name}</span>
-                              <span className="last-message">{conv.lastMessage || "No messages"}</span>
-                            </div>
-                          </div>
-                          <button
-                            className="delete-conversation-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteConversation(conv._id);
-                            }}
-                          >
-                            <img src="/images/delete-icon.png" alt="Delete" className="delete-icon" />
-                          </button>
-                        </li>
+                        <li key={conv._id} className="conversation-item"
+    onClick={() => {
+      setSelectedConversation(conv);
+      setSelectedFriend(null);
+      fetchMessages(conv._id);
+    }}
+  >
+    <div className="conversation-info">
+      <img
+        src={
+          other?.profilePicture
+            ? `${API_URL}${other.profilePicture}`
+            : "/images/default.jpg"
+        }
+        alt={other?.name}
+        className="participant-avatar"
+      />
+      <div className="participant-details">
+        <span className="participant-name">{other?.name}</span>
+        <span className="last-message">{conv.lastMessage || "No messages"}</span>
+      </div>
+    </div>
+    <button
+      className="delete-conversation-btn"
+      onClick={(e) => {
+        e.stopPropagation(); // Add this to prevent the conversation from opening when deleting
+        deleteConversation(conv._id);
+      }}
+    >
+      <img src="/images/delete-icon.png" alt="Delete" className="delete-icon" />
+    </button>
+  </li>
                       );
                     })}
                   </ul>
@@ -125,51 +135,48 @@ const ChatWindow = ({
                 )}
               </div>
             </div>
-
-            {/* Messages Area */}
-            {(selectedConversation || selectedFriend) && (
-              <div className="messages-container">
-                <div className="messages-list">
-                  {messages.map((message) => (
-                    <div
-                      key={message._id}
-                      className={`message ${message.sender._id === user._id ? 'sent' : 'received'}`}
-                    >
-                      <p>{message.content}</p>
-                      {message.sender._id === user._id && (
-                        <button className="delete-message" onClick={() => deleteMessage(message._id)}>
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Input */}
-                <div className="message-input-container">
-                  <textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
-                    className="send-message-btn"
+          ) : (
+            // Messages View
+            <div className="messages-container">
+              <div className="messages-list">
+                {messages.map((message) => (
+                  <div
+                    key={message._id}
+                    className={`message ${message.sender._id === user._id ? 'sent' : 'received'}`}
                   >
-                    Send
-                  </button>
-                </div>
+                    <p>{message.content}</p>
+                    {message.sender._id === user._id && (
+                      <button className="delete-message" onClick={() => deleteMessage(message._id)}>
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
-        )}
+
+              <div className="message-input-container">
+                <textarea
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                  className="send-message-btn"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
