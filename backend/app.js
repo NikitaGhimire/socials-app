@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const connectDB = require("./src/config/db"); // Import the DB connection function
+const connectDB = require("./src/config/db"); 
 const path = require("path");
 const userRoutes = require("./src/routes/userRoutes");
 const friendRoutes = require("./src/routes/friendRoutes");
@@ -11,21 +11,17 @@ const compression = require('compression');
 const app = express();
 
 // Middleware
-// Allow CORS for preflight requests
-app.options('*', cors()); // Handle preflight requests for all routes
-
 app.use(cors({
-    origin: [
-        "http://localhost:3000",
-        "https://messaging-app-ebon-two.vercel.app"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: process.env.NODE_ENV === 'production' 
+        ? 'https://messaging-app-ebon-two.vercel.app'
+        : 'http://localhost:3000',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"]
-})); // Enable CORS for all requests
-app.use(express.json()); // Parse incoming JSON requests
+    allowedHeaders: ['Content-Type', 'Authorization']
+})); 
+app.use(express.json()); 
 
-app.use(compression()); // Enable compression for responses
+app.use(compression()); 
 
 // Serve static files from the "src/uploads" folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -37,12 +33,7 @@ app.use((req, res, next) => {
 });
 
 // Database connection
-connectDB(); // Connect to MongoDB
-
-// // Catch 404 errors
-// app.use((req, res, next) => {
-//   res.status(404).json({ message: "Resource not found" });
-// });
+connectDB(); 
 
 // General error handler
 app.use((err, req, res, next) => {
