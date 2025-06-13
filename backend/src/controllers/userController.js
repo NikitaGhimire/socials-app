@@ -75,30 +75,50 @@ const getUserProfile = async (req, res) => {
 // Update user profile
 const updateUserProfile = async (req, res) => {
     try {
+        // Debug logging
         console.log("Request body:", req.body);
         console.log("Uploaded file:", req.file);
 
+        // Find user and handle not found case
         const user = await User.findById(req.user.id);
-
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        user.name = req.body.name || user.name;
-        user.bio = req.body.bio || user.bio;
-        user.statusMessage = req.body.statusMessage || user.statusMessage;
+        // Update user fields if provided
+        if (req.body.name) user.name = req.body.name;
+        if (req.body.bio) user.bio = req.body.bio;
+        if (req.body.statusMessage) user.statusMessage = req.body.statusMessage;
 
+        // Handle profile picture upload
         if (req.file) {
-            const cloudinaryUrl = req.file.secure_url || req.file.path;
-            user.profilePicture = cloudinaryUrl?.startsWith('http') ? cloudinaryUrl : process.env.DEFAULT_CLOUDINARY_PROFILE_PIC;
+            try {
+                const cloudinaryUrl = req.file.secure_url || req.file.path;
+                if (!cloudinaryUrl) {
+                    throw new Error('No secure URL provided by Cloudinary');
+                }
+                user.profilePicture = cloudinaryUrl;
+            } catch (uploadError) {
+                console.error("Cloudinary upload error:", uploadError);
+                return res.status(400).json({ 
+                    message: "Error uploading profile picture",
+                    error: uploadError.message 
+                });
+            }
         }
 
+        // Ensure default profile picture if none exists
         if (!user.profilePicture) {
             user.profilePicture = process.env.DEFAULT_CLOUDINARY_PROFILE_PIC;
         }
 
+        // Save user and handle validation errors
         const updatedUser = await user.save();
+        if (!updatedUser) {
+            throw new Error('Failed to save user updates');
+        }
 
+        // Send success response
         res.json({
             _id: updatedUser._id,
             name: updatedUser.name,
@@ -107,9 +127,26 @@ const updateUserProfile = async (req, res) => {
             statusMessage: updatedUser.statusMessage,
             profilePicture: updatedUser.profilePicture,
         });
+
     } catch (error) {
         console.error("Error updating profile:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        
+        // Handle different types of errors
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ 
+                message: "Validation Error", 
+                errors: Object.values(error.errors).map(err => err.message)
+            });
+        }
+        
+        if (error.name === 'CastError') {
+            return res.status(400).json({ message: "Invalid user ID format" });
+        }
+        
+        res.status(500).json({ 
+            message: "Error updating profile",
+            error: error.message
+        });
     }
 };
 
