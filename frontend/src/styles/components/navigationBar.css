@@ -1,0 +1,358 @@
+/* Base Navigation Styles */
+.navigation-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 60px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Layout Sections */
+.nav-left, .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-left {
+    flex: 1;
+    max-width: 300px;
+}
+
+/* Search Section */
+.search-container {
+    display: flex;
+    align-items: center;
+    background: #f0f2f5;
+    border-radius: 20px;
+    padding: 5px 15px;
+    width: 100%;
+}
+
+.nav-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+.nav-search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.nav-search-button img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.nav-search-button:hover img {
+    opacity: 1;
+}
+
+/* Navigation Icons */
+.nav-icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.nav-icon-button:hover {
+    background-color: #f0f2f5;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* Profile Section */
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+.nav-profile-pic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.profile-info {
+    display: none; /* Hidden by default on large screens */
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+}
+
+.nav-label {
+    display: none;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+    animation: fadeIn 0.2s ease;
+}
+
+.popup-content {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideDown 0.3s ease;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.close-button:hover {
+    color: #333;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hamburger Menu */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.hamburger-icon {
+    width: 24px;
+    height: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hamburger-icon span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background-color: #4a6dad;
+    transition: all 0.3s ease;
+}
+
+/* Mobile Styles */
+@media screen and (max-width: 768px) {
+    .navigation-bar {
+        padding: 0 10px;
+    }
+
+    .nav-left {
+        max-width: 150px;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-right {
+        position: fixed;
+        top: 60px;
+        right: -250px;
+        width: 250px;
+        height: calc(100vh - 60px);
+        background: white;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 999;
+    }
+
+    .nav-right.show {
+        right: 0;
+    }
+
+    .nav-icon-button {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 15px;
+        padding: 12px;
+        margin: 5px 0;
+    }
+
+    .profile-section {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 10px;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-name {
+        font-size: 13px;
+        max-width: 120px;
+        color: #333;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .nav-label {
+        display: inline-block;
+        margin-left: 10px;
+        color: #4a6dad;
+        font-size: 12px;
+    }
+
+    /* Hamburger Animation */
+    .menu-toggle[aria-expanded="true"] .hamburger-icon span:nth-child(1) {
+        transform: translateY(9px) rotate(45deg);
+    }
+
+    .menu-toggle[aria-expanded="true"] .hamburger-icon span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle[aria-expanded="true"] .hamburger-icon span:nth-child(3) {
+        transform: translateY(-9px) rotate(-45deg);
+    }
+
+    .nav-right.show .profile-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .user-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+    }
+}
+
+/* Close menu when clicking outside */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+.overlay.show {
+    display: block;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .navigation-bar {
+        padding: 0 10px;
+    }
+
+    .nav-left {
+        max-width: 150px;
+    }
+
+    .nav-center {
+        display: none;
+    }
+    
+    .nav-search-input {
+        width: 150px;
+    }
+
+    .nav-right {
+        gap: 10px;
+    }
+    
+    .nav-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .profile-info {
+        display: flex; /* Show only profile picture on mobile */
+        font-size: 16px;
+    }
+    
+    .profile-section {
+        padding: 4px;
+    }
+    
+    /* Show profile info when menu is open */
+    .nav-right.show .profile-info {
+        display: flex;
+    }
+}
