@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContex";
-import "../styles/login.css";
+import "../styles/pages/login.css";
 import Footer from '../components/Footer';
 
 const Login = () => {

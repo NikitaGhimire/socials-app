@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
-import "../styles/register.css";
+import "../styles/pages/register.css";
 import Footer from "../components/Footer";
 
 const Register = () => {

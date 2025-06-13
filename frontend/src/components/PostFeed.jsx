@@ -1,5 +1,4 @@
-import React from 'react';
-import { API_URL } from '../pages/Home';
+import '../styles/components/PostFeed.css';
 
 const PostFeed = ({
   posts,
