@@ -1,0 +1,170 @@
+/* Friends List */
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.friend-item, .friend-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.friend-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.friend-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Friend Info Section */
+.friend-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.friend-avatar, .user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #4a6dad;
+}
+
+.user-avatar {
+    border: 1px solid #ddd;
+}
+
+.friend-details, .user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.friend-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.friend-details h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.friend-details p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Friend Actions */
+.friend-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.message-friend-btn,
+.unfriend-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.message-friend-btn {
+    background-color: #4a6dad;
+    color: white;
+}
+
+.message-friend-btn:hover {
+    background-color: #3a5a8c;
+}
+
+.unfriend-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.unfriend-btn:hover {
+    background-color: #c82333;
+}
+
+/* No Friends Message */
+.no-friends-message {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+/* Popup Header */
+.popup-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .popup-content {
+        width: 95%;
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    .friend-actions {
+        flex-direction: column;
+    }
+
+    .friend-item {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .friend-info {
+        flex-direction: column;
+    }
+
+    .message-friend-btn,
+    .unfriend-btn {
+        width: 100%;
+    }
+}

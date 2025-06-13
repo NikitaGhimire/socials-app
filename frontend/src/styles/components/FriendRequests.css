@@ -1,0 +1,153 @@
+/* Header */
+.popup-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Requests List */
+.requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.request-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.request-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Request Info */
+.request-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.request-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #4a6dad;
+}
+
+.request-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.request-details h4 {
+    margin: 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.request-details p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Request Actions */
+.request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.accept-button,
+.reject-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.accept-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.accept-button:hover {
+    background-color: #218838;
+}
+
+.reject-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.reject-button:hover {
+    background-color: #c82333;
+}
+
+/* No Requests Message */
+.no-requests-message {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .popup-content {
+        width: 95%;
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    .request-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .request-item {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .request-info {
+        flex-direction: column;
+    }
+
+    .accept-button,
+    .reject-button {
+        width: 100%;
+    }
+}
