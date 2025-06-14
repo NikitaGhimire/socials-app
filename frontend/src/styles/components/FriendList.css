@@ -75,6 +75,7 @@
 .friend-actions {
     display: flex;
     gap: 10px;
+    align-items: center;
 }
 
 .message-friend-btn,
@@ -103,6 +104,28 @@
 
 .unfriend-btn:hover {
     background-color: #c82333;
+}
+
+.chat-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    background-color: #28a745;
+    color: white;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.chat-btn:hover {
+    background-color: #218838;
+}
+
+.chat-btn:active {
+    transform: scale(0.98);
 }
 
 /* No Friends Message */
@@ -151,6 +174,7 @@
 
     .friend-actions {
         flex-direction: column;
+        width: 100%;
     }
 
     .friend-item {
@@ -164,7 +188,9 @@
     }
 
     .message-friend-btn,
-    .unfriend-btn {
+    .unfriend-btn,
+    .chat-btn {
         width: 100%;
+        justify-content: center;
     }
 }
