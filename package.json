@@ -3,15 +3,21 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run backend\" \"npm run frontend\"",
+    "backend": "npm start --workspace=backend",
+    "frontend": "PORT=3001 npm start --workspace=frontend",
+    "start": "npm run dev"
   },
-  "workspaces":[
+  "workspaces": [
     "frontend",
     "backend"
   ],
-
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
 }
