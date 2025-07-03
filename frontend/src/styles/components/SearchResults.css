@@ -5,68 +5,94 @@
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 60px;
+    padding-top: 80px;
     z-index: 1000;
+    animation: fadeIn 0.2s ease;
 }
 
 .popup-content {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 24px;
+    border-radius: 16px;
     width: 90%;
     max-width: 500px;
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideUp 0.3s ease;
 }
 
 .popup-header {
     margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    font-size: 1.2rem;
-    color: #333;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+    font-size: 1.3rem;
+    color: #1f2937;
+    font-weight: 600;
 }
 
 .close-button {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
+    top: 16px;
+    right: 16px;
+    background: rgba(107, 114, 128, 0.1);
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #666;
+    color: #6b7280;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close-button:hover {
+    background: rgba(107, 114, 128, 0.2);
+    color: #374151;
+    transform: scale(1.1);
 }
 
 .search-results {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .search-result-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    border-radius: 8px;
-    background: #f8f9fa;
-    transition: background-color 0.2s;
+    padding: 15px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .search-result-item:hover {
-    background: #f0f2f5;
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .user-info {
     display: flex;
     align-items: center;
     gap: 15px;
+    flex: 1;
 }
 
 .user-avatar {
@@ -74,7 +100,14 @@
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #ddd;
+    border: 2px solid #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    transition: all 0.2s ease;
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .user-avatar.error {
@@ -83,14 +116,21 @@
 
 .user-details h4 {
     margin: 0;
-    color: #1a1a1a;
+    color: #1f2937;
     font-size: 1rem;
+    font-weight: 600;
 }
 
 .user-details p {
     margin: 5px 0 0;
-    color: #65676b;
+    color: #6b7280;
     font-size: 0.9rem;
+}
+
+.user-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .add-friend-btn {
@@ -109,55 +149,118 @@
 
 .friend-status-btn {
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: none;
     font-weight: 500;
+    font-size: 14px;
     transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 80px;
+    text-align: center;
 }
 
 .friend-status-btn.add {
-    background: #1877f2;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .friend-status-btn.add:hover {
-    background: #166fe5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.friend-status-btn.friends {
-    background: #e4e6eb;
-    color: #050505;
-    cursor: default;
+.friend-status-btn.chat {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.friend-status-btn.chat:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 
 .friend-status-btn.pending {
-    background: #e4e6eb;
-    color: #65676b;
-    cursor: default;
+    background: #e5e7eb;
+    color: #6b7280;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.friend-status-btn.pending:disabled {
+    opacity: 0.7;
 }
 
 .friend-status-btn.unfriend {
-    background-color: #dc3545;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
-}
-
-.friend-status-btn.cancel {
-    background-color: #6c757d;
-    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .friend-status-btn.unfriend:hover {
-    background-color: #bb2d3b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.friend-status-btn.cancel {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
 }
 
 .friend-status-btn.cancel:hover {
-    background-color: #5c636a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
 }
 
 .no-results {
     text-align: center;
-    padding: 20px;
-    color: #65676b;
+    padding: 40px 20px;
+    color: #6b7280;
     font-size: 1.1rem;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .popup-content {
+        width: 95%;
+        padding: 20px;
+        margin-top: 40px;
+    }
+    
+    .user-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .friend-status-btn {
+        min-width: 100px;
+        font-size: 13px;
+        padding: 6px 12px;
+    }
 }

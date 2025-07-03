@@ -323,6 +323,41 @@ const searchUsers = async (req, res) => {
   }
 };
 
+// Cancel sent friend request
+const cancelFriendRequest = async (req, res) => {
+    const senderId = req.user.id;
+    const { userId: receiverId } = req.body;
+    
+    try {
+        if (!receiverId) {
+            return res.status(400).json({ message: "Receiver ID is required" });
+        }
+
+        // Find and delete the pending friend request
+        const deletedRequest = await FriendRequest.findOneAndDelete({
+            sender: senderId,
+            receiver: receiverId,
+            status: 'pending'
+        });
+
+        if (!deletedRequest) {
+            return res.status(404).json({ 
+                message: "No pending friend request found"
+            });
+        }
+
+        res.status(200).json({ 
+            success: true,
+            message: "Friend request canceled successfully" 
+        });
+    } catch (error) {
+        console.error("Error canceling friend request:", error);
+        res.status(500).json({ 
+            message: "Error canceling friend request",
+            error: error.message 
+        });
+    }
+};
 
 module.exports = { 
   sendFriendRequest, 
@@ -332,5 +367,6 @@ module.exports = {
   unfriend, 
   viewSentFriendRequests, 
   deleteAllSentFriendRequests,
-  searchUsers  
+  searchUsers,
+  cancelFriendRequest
 };

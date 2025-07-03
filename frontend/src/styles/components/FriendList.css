@@ -41,7 +41,8 @@
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #4a6dad;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-avatar {
@@ -89,12 +90,14 @@
 }
 
 .message-friend-btn {
-    background-color: #4a6dad;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .message-friend-btn:hover {
-    background-color: #3a5a8c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .unfriend-btn {

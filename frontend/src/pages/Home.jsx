@@ -58,44 +58,42 @@ const Home = () => {
     const fetchUserData = useCallback(async () => {
         try {
             setLoading(true);
-            console.log("Fetching user data...");
     
             // Fetch all data concurrently using Promise.all
-            const [friendsResponse, requestsResponse, profileResponse, conversationsResponse, postsResponse] = await Promise.all([
+            const [friendsResponse, requestsResponse, profileResponse, conversationsResponse, postsResponse, sentRequestsResponse] = await Promise.all([
                 api.get("/friends/myfriends"),
                 api.get("/friends/requests"),
                 api.get("/users/profile"),
                 api.get("/messages/chats"),
                 api.get("/posts"),
+                api.get("/friends/sentRequests"),
             ]);
     
             // Handle friends
-            console.log("Fetched friends:", friendsResponse.data);
             setFriends(friendsResponse.data.uniqueFriends);
     
             // Handle friend requests
-            console.log("Fetched friend requests:", requestsResponse.data);
             setFriendRequests(requestsResponse.data.friendRequests);
     
             // Handle user profile
-            console.log("Fetched profile:", profileResponse.data);
             if (profileResponse.status === 200) {
                 setUserProfile(profileResponse.data);
             }
     
             // Handle conversations
-            console.log("Fetched conversations:", conversationsResponse.data);
             setConversations(conversationsResponse.data || []);
 
-            //handle posts
-            console.log("Fetched posts: ", postsResponse.data );
+            // Handle posts
             setPosts(postsResponse.data || []);
             setLoadingPosts(false); 
+
+            // Handle sent friend requests (pending requests)
+            const pendingRequestIds = sentRequestsResponse.data.sentRequests?.map(request => request.receiver._id) || [];
+            setPendingRequests(pendingRequestIds);
     
         } catch (err) {
             console.error("Error fetching data", err.response ? err.response.data : err.message);
         } finally {
-            console.log("Data fetch complete.");
             setLoading(false);
         }
     }, []);
@@ -183,7 +181,6 @@ const Home = () => {
     const fetchMessages = async (conversationId) => {
         try {
             const response = await api.get(`/messages/${conversationId}`);
-            console.log('Fetched messages:', response.data);
             if (Array.isArray(response.data)) {
                 setMessages(response.data); 
              // Set messages only if it's an array
@@ -292,14 +289,9 @@ const Home = () => {
                 formData.append("profilePicture", profileUpdates.profilePicture);
             }
 
-            console.log("Updating profile...");
             const response = await api.put("/users/update-profile", formData, {
                 headers: { 
                     "Content-Type": "multipart/form-data"
-                },
-                onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    console.log(`Upload Progress: ${percentCompleted}%`);
                 }
             });
 
@@ -336,23 +328,17 @@ const Home = () => {
     };
 
     const sendFriendRequest = async (friendId) => {
-        console.log("Attempting to send friend request...");
-        console.log("Friend ID:", friendId);
-    
-        // Check if the token is correctly retrieved
         const token = localStorage.getItem('token');
-        console.log("Authorization Token:", token);
     
         if (!token) {
-            console.error("No token found in localStorage");
             alert("Authentication token missing. Please log in again.");
             return;
         }
     
         try {
-            const response = await api.post(
+            await api.post(
                 `/friends/send`,
-                { userId: friendId }, // Debugging payload
+                { userId: friendId },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -360,21 +346,14 @@ const Home = () => {
                 }
             );
     
-            // Log the success response
-            console.log("Friend request sent successfully:", response.data);
             alert("Friend request sent!");
             setPendingRequests(prev => [...prev, friendId]);
-            fetchUserData();
         } catch (err) {
             console.error("Error sending friend request:", err);
     
-            // Log detailed error response, if available
             if (err.response) {
-                console.error("Error Response Status:", err.response.status);
-                console.error("Error Response Data:", err.response.data);
                 alert(`Error: ${err.response.data.message || "Failed to send friend request."}`);
             } else {
-                console.error("Network or unexpected error:", err.message);
                 alert("An unexpected error occurred. Please try again later.");
             }
         }
@@ -397,13 +376,10 @@ const Home = () => {
     };
 
     const handleProfileChange = (e) => {
-        console.log("Updating field:", e.target.name, "New value:", e.target.value);
         setProfileUpdates({ ...profileUpdates, [e.target.name]: e.target.value });
     };
     const handleFriendRequest = async (requestId, action) => {
         try {
-            console.log('Sending request with:', { requestId, action }); // Debug log
-    
             const response = await api.put('/friends/handle-request', {
                 requestId,
                 action
@@ -436,15 +412,58 @@ const Home = () => {
             const response = await api.post("/friends/unfriend", { friendId });
     
             if (response.status === 200) {
-                console.log("Friend removed successfully");
                 // update the local friend list by filtering out the unfriended user
-                fetchUserData();
                 setFriends((prevFriends) => prevFriends.filter(friend => friend._id !== friendId));
+                alert("Friend removed successfully!");
             } else {
                 console.error("Failed to unfriend");
             }
         } catch (error) {
             console.error("Error unfriending:", error);
+            alert("Failed to unfriend user");
+        }
+    };
+
+    const cancelFriendRequest = async (userId) => {
+        try {
+            const response = await api.post("/friends/cancel-request", { userId });
+            
+            if (response.status === 200 && response.data.success) {
+                setPendingRequests(prev => prev.filter(id => id !== userId));
+                alert("Friend request canceled!");
+            } else {
+                alert("Failed to cancel friend request");
+            }
+        } catch (error) {
+            console.error("Error canceling friend request:", error);
+            alert(`Failed to cancel friend request: ${error.response?.data?.message || error.message}`);
+        }
+    };
+
+    const startChatWithUser = async (friendId) => {
+        try {
+            // First, check if a conversation already exists
+            const existingConversation = conversations.find(conv => 
+                conv.participants.some(p => p._id === friendId)
+            );
+
+            if (existingConversation) {
+                // If conversation exists, select it and show chat
+                setSelectedConversation(existingConversation);
+                setSelectedFriend(friendId);
+                await fetchMessages(existingConversation._id);
+            } else {
+                // If no conversation exists, create one by selecting the friend
+                setSelectedFriend(friendId);
+                setSelectedConversation(null);
+                setMessages([]);
+            }
+            
+            setIsChatVisible(true);
+            setShowSearchOverlay(false); // Close search overlay
+        } catch (error) {
+            console.error("Error starting chat:", error);
+            alert("Failed to start chat");
         }
     };
 
@@ -470,7 +489,6 @@ const Home = () => {
            });
 
            setPosts((prevPosts) => [response.data, ...prevPosts]);
-           console.log("Post created successfully");
         } catch (error) {
           console.error("Error creating post:", error);
         }
@@ -537,8 +555,6 @@ const Home = () => {
         } catch (error) {
             const errorMessage = error?.response?.data?.message || 'Error updating like';
             console.error('Error toggling like:', errorMessage);
-            // Optionally show user feedback
-            // alert(errorMessage);
         }
     };
     
@@ -593,8 +609,6 @@ const Home = () => {
         };
     }, [showOptions]);
 
-    console.log('Rendering Home with userProfile:', userProfile);
-
     return (
         <Suspense fallback={<div>Loading...</div>}>
             <div className="home-container">
@@ -640,6 +654,9 @@ const Home = () => {
                                     isFriend={isFriend}
                                     isPendingRequest={isPendingRequest}
                                     sendFriendRequest={sendFriendRequest}
+                                    cancelFriendRequest={cancelFriendRequest}
+                                    unfriendUser={handleUnfriend}
+                                    startChatWithUser={startChatWithUser}
                                 />
                             )}
 
@@ -662,48 +679,6 @@ const Home = () => {
                                 handleFriendRequest={handleFriendRequest}
                                 setFriendRequestsVisible={setFriendRequestsVisible}
                             />
-                            )}
-
-                            {/* Search Results Popup */}
-                            {searchResults.length > 0 && showSearchOverlay && (
-                                <div className="popup-overlay" onClick={() => setShowSearchOverlay(false)}>
-                                    <div className="popup-content" onClick={e => e.stopPropagation()}>
-                                        <button className="close-button" onClick={() => setShowSearchOverlay(false)}>×</button>
-                                        <h2 className="popup-header">Search Results</h2>
-                                        <div className="search-results">
-                                            {searchResults.map((searchedUser) => (
-                                                <div key={searchedUser._id} className="search-result-item">
-                                                    <div className="user-info">
-                                                        <img 
-                                                            src={searchedUser.profilePicture && searchedUser.profilePicture.includes('cloudinary.com') 
-                                                                ? searchedUser.profilePicture 
-                                                                : '/images/default.jpg'
-                                                            } 
-                                                            alt={searchedUser.name} 
-                                                            className="user-avatar"
-                                                            onError={(e) => {
-                                                                e.target.onerror = null;
-                                                                e.target.src = '/images/default.jpg';
-                                                            }}
-                                                        />
-                                                        <div className="user-details">
-                                                            <h4>{searchedUser.name}</h4>
-                                                            <p>{searchedUser.statusMessage || "No status"}</p>
-                                                        </div>
-                                                    </div>
-                                                    {!isFriend(searchedUser._id) && (
-                                                        <button 
-                                                            className="add-friend-btn"
-                                                            onClick={() => sendFriendRequest(searchedUser._id)}
-                                                        >
-                                                            Add Friend
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
                             )}
 
                             {/* Chat/Conversations Popup */}
@@ -730,32 +705,30 @@ const Home = () => {
                                 deleteConversation={deleteConversation}
                             />
 
-                            {/* Main Content - Posts Section */}
-                            <div className="main-content">
+                            {/* Main Content */}
+                            <main className="main-content">
                                 <div className="animated-background">
                                     <div className="shape shape1"></div>
                                     <div className="shape shape2"></div>
                                     <div className="shape shape3"></div>
                                     <div className="shape shape4"></div>
                                 </div>
-                                <div className="post-section">
-                                    <button className="create-post-button" onClick={() => setShowCreatePost(true)}>
-                                        Create New Post
-                                    </button>
-                                    {showCreatePost && <CreatePost onCreatePost={handleCreatePost} />}
-                                    
-                                    
-                                    <PostFeed
-                                        posts={posts}
-                                        loadingPosts={loadingPosts}
-                                        handleLikePost={handleLikePost}
-                                        toggleCommentsVisibility={toggleCommentsVisibility}
-                                        handleDeletePost={handleDeletePost}
-                                        handleAddComment={handleAddComment}
-                                        user={user}
-                                    />
-                                </div>
-                            </div>
+                                
+                                <button className="create-post-button" onClick={() => setShowCreatePost(true)}>
+                                    Create New Post
+                                </button>
+                                {showCreatePost && <CreatePost onCreatePost={handleCreatePost} />}
+                                
+                                <PostFeed
+                                    posts={posts}
+                                    loadingPosts={loadingPosts}
+                                    handleLikePost={handleLikePost}
+                                    toggleCommentsVisibility={toggleCommentsVisibility}
+                                    handleDeletePost={handleDeletePost}
+                                    handleAddComment={handleAddComment}
+                                    user={user}
+                                />
+                            </main>
 
                         </>
                     )} </>

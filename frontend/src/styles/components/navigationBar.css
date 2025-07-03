@@ -201,7 +201,7 @@
     display: block;
     height: 2px;
     width: 100%;
-    background-color: #4a6dad;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     transition: all 0.3s ease;
 }
 
@@ -282,8 +282,12 @@
     .nav-label {
         display: inline-block;
         margin-left: 10px;
-        color: #4a6dad;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         font-size: 12px;
+        font-weight: 600;
     }
 
     /* Hamburger Animation */

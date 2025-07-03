@@ -8,28 +8,45 @@ const SearchResults = ({
     isPendingRequest,
     sendFriendRequest,
     cancelFriendRequest, 
-    unfriendUser 
+    unfriendUser,
+    startChatWithUser
 }) => {
-    // Helper function to get button state
-    const getFriendButtonState = (userId) => {
+    // Helper function to get button state and actions
+    const getUserActions = (userId) => {
         if (isFriend(userId)) {
-            return { 
-                text: 'Unfriend', 
-                className: 'friend-status-btn unfriend',
-                action: () => unfriendUser(userId)
+            return {
+                primaryButton: {
+                    text: 'Chat', 
+                    className: 'friend-status-btn chat',
+                    action: () => startChatWithUser(userId)
+                },
+                secondaryButton: {
+                    text: 'Unfriend', 
+                    className: 'friend-status-btn unfriend',
+                    action: () => unfriendUser(userId)
+                }
             };
         }
         if (isPendingRequest(userId)) {
-            return { 
-                text: 'Cancel Request', 
-                className: 'friend-status-btn cancel',
-                action: () => cancelFriendRequest(userId)
+            return {
+                primaryButton: {
+                    text: 'Request Sent', 
+                    className: 'friend-status-btn pending',
+                    disabled: true
+                },
+                secondaryButton: {
+                    text: 'Cancel', 
+                    className: 'friend-status-btn cancel',
+                    action: () => cancelFriendRequest(userId)
+                }
             };
         }
-        return { 
-            text: 'Add Friend', 
-            className: 'friend-status-btn add',
-            action: () => sendFriendRequest(userId)
+        return {
+            primaryButton: {
+                text: 'Add Friend', 
+                className: 'friend-status-btn add',
+                action: () => sendFriendRequest(userId)
+            }
         };
     };
 
@@ -83,7 +100,7 @@ const SearchResults = ({
                 <h2 className="popup-header">Search Results</h2>
                 <div className="search-results">
                     {searchResults.map((searchedUser) => {
-                        const buttonState = getFriendButtonState(searchedUser._id);
+                        const userActions = getUserActions(searchedUser._id);
                         
                         return (
                             <div key={searchedUser._id} className="search-result-item">
@@ -104,12 +121,23 @@ const SearchResults = ({
                                         <p>{searchedUser.statusMessage || "No status"}</p>
                                     </div>
                                 </div>
-                                <button 
-                                    className={buttonState.className}
-                                    onClick={buttonState.action}
-                                >
-                                    {buttonState.text}
-                                </button>
+                                <div className="user-actions">
+                                    <button 
+                                        className={userActions.primaryButton.className}
+                                        onClick={userActions.primaryButton.action}
+                                        disabled={userActions.primaryButton.disabled}
+                                    >
+                                        {userActions.primaryButton.text}
+                                    </button>
+                                    {userActions.secondaryButton && (
+                                        <button 
+                                            className={userActions.secondaryButton.className}
+                                            onClick={userActions.secondaryButton.action}
+                                        >
+                                            {userActions.secondaryButton.text}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         );
                     })}

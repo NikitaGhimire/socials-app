@@ -7,7 +7,8 @@ const {
     unfriend,
     viewSentFriendRequests, 
     deleteAllSentFriendRequests,
-    searchUsers
+    searchUsers,
+    cancelFriendRequest
 } = require("../controllers/friendController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -15,6 +16,9 @@ const router = express.Router();
 
 // Send a friend request
 router.post("/send", protect, sendFriendRequest);
+
+// Cancel a sent friend request
+router.post("/cancel-request", protect, cancelFriendRequest);
 
 //accept/reject friend request
 router.put("/handle-request", protect, handleFriendRequest)

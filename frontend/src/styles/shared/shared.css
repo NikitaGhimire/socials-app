@@ -53,12 +53,16 @@
 }
 
 .primary-button {
-    background-color: #4a6dad;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    border: none;
+    transition: all 0.3s ease;
 }
 
 .primary-button:hover {
-    background-color: #3a5a8c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
 }
 
 .danger-button {
@@ -95,7 +99,8 @@
 
 .form-input:focus {
     outline: none;
-    border-color: #4a6dad;
+    border-color: rgba(102, 126, 234, 0.4);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* Common Avatar Styles */
@@ -109,7 +114,8 @@
 .avatar.large {
     width: 120px;
     height: 120px;
-    border: 3px solid #4a6dad;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* Common Animations */
