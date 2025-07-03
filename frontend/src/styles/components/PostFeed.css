@@ -200,7 +200,7 @@
 .create-post-button {
     width: 100%;
     padding: 12px 20px;
-    background-color: #4a6dad;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -209,18 +209,17 @@
     cursor: pointer;
     margin-bottom: 20px;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(74, 109, 173, 0.2);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .create-post-button:hover {
-    background-color: #3a5a8c;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(74, 109, 173, 0.3);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .create-post-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(74, 109, 173, 0.2);
+    transform: translateY(0) scale(1);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 /* Animations */

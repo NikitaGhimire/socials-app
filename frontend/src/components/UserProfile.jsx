@@ -33,14 +33,32 @@ const UserProfile = ({
           />
           {!editingProfile ? (
             <div className="profile-details">
-              <p>Name: {userProfile?.name}</p>
-              <p>Email: {userProfile?.email}</p>
-              <p>Bio: {userProfile?.bio}</p>
-              <p>Status: {userProfile?.statusMessage}</p>
-              <button onClick={() => setEditingProfile(true)} className="edit-profile-button">
-                Edit Profile
-              </button>
-              <button onClick={handleLogout} className="logout-button">Logout</button>
+              <div className="profile-field">
+                <span className="field-label">Name</span>
+                <span className="field-value">{userProfile?.name || 'Not provided'}</span>
+              </div>
+              <div className="profile-field">
+                <span className="field-label">Email</span>
+                <span className="field-value">{userProfile?.email || 'Not provided'}</span>
+              </div>
+              {userProfile?.bio && (
+                <div className="profile-field">
+                  <span className="field-label">Bio</span>
+                  <span className="field-value">{userProfile.bio}</span>
+                </div>
+              )}
+              {userProfile?.statusMessage && (
+                <div className="profile-field">
+                  <span className="field-label">Status</span>
+                  <span className="field-value">{userProfile.statusMessage}</span>
+                </div>
+              )}
+              <div className="profile-actions">
+                <button onClick={() => setEditingProfile(true)} className="edit-profile-button">
+                  Edit Profile
+                </button>
+                <button onClick={handleLogout} className="logout-button">Logout</button>
+              </div>
             </div>
           ) : (
             <div className="edit-profile-form">

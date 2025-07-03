@@ -7,17 +7,20 @@
     width: 100%;
     min-height: 120px;
     padding: 15px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
     resize: vertical;
     font-size: 16px;
     margin-bottom: 15px;
-    transition: border-color 0.2s ease;
+    transition: all 0.2s ease;
+    background: #fafafa;
 }
 
 .post-textarea:focus {
     outline: none;
-    border-color: #4a6dad;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* Post Actions */
@@ -26,7 +29,7 @@
     justify-content: space-between;
     align-items: center;
     padding-top: 15px;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #e5e7eb;
 }
 
 .left-actions {
@@ -40,13 +43,16 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
 .attachment-icon:hover {
     background-color: #f0f2f5;
+    border-color: #e5e7eb;
+    transform: translateY(-1px);
 }
 
 .attachment-img {
@@ -56,7 +62,7 @@
 }
 
 .attachment-icon span {
-    color: #4a6dad;
+    color: #667eea;
     font-size: 14px;
     font-weight: 500;
 }
@@ -79,23 +85,28 @@
 
 /* Post Button */
 .post-button {
-    background-color: #4a6dad;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    padding: 10px 24px;
-    border-radius: 6px;
+    padding: 12px 24px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    font-size: 14px;
 }
 
 .post-button:hover:not(:disabled) {
-    background-color: #3a5a8c;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .post-button:disabled {
-    background-color: #e0e0e0;
+    background: #d1d5db;
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
 /* Animations */
