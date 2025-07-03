@@ -14,7 +14,7 @@ const app = express();
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
         ? 'https://messaging-app-ebon-two.vercel.app'
-        : 'http://localhost:3000',
+        : process.env.CORS_ORIGIN || 'http://localhost:3001',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']

@@ -14,7 +14,7 @@ const ChatWindow = lazy(() => import ('../components/ChatWindow'));
 const PostFeed = lazy(() => import ('../components/PostFeed'));
 const SearchResults = lazy(() => import('../components/SearchResults'));
 
-export const API_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+export const API_URL = process.env.REACT_APP_API_BASE_URL?.replace('/api', '') || 'http://localhost:5001';
 
 const Home = () => {
     const { user, logout } = useAuth();
