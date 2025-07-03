@@ -25,6 +25,14 @@ const ChatWindow = ({
   const getOtherParticipant = (conv) =>
     conv.participants?.find((p) => p._id !== user._id);
 
+  // Helper function for profile picture URL
+  const getProfilePicUrl = (profilePicture) => {
+    if (!profilePicture) return '/images/default.jpg';
+    return profilePicture.includes('cloudinary.com') 
+      ? profilePicture 
+      : '/images/default.jpg';
+  };
+
   const handleBackToList = () => {
     setSelectedConversation(null);
     setSelectedFriend(null);
@@ -102,16 +110,15 @@ const ChatWindow = ({
       fetchMessages(conv._id);
     }}
   >
-    <div className="conversation-info">
-      <img
-        src={
-          other?.profilePicture
-            ? `${API_URL}${other.profilePicture}`
-            : "/images/default.jpg"
-        }
-        alt={other?.name}
-        className="participant-avatar"
-      />
+    <div className="conversation-info">                      <img
+                        src={getProfilePicUrl(other?.profilePicture)}
+                        alt={other?.name}
+                        className="participant-avatar"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/images/default.jpg';
+                        }}
+                      />
       <div className="participant-details">
         <span className="participant-name">{other?.name}</span>
         <span className="last-message">{conv.lastMessage || "No messages"}</span>

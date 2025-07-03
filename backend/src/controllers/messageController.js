@@ -57,10 +57,10 @@ const getConversations = async (req, res) => {
 
   try {
     const conversations = await Conversation.find({ participants: userId })
-      .populate("participants", "name email")
+      .populate("participants", "name email profilePicture")
       .populate({
           path: "latestMessage",
-          populate: { path: "sender receiver", select: "name email" }
+          populate: { path: "sender receiver", select: "name email profilePicture" }
         });
       // Check if conversations were found
   if (!conversations || conversations.length === 0) {
