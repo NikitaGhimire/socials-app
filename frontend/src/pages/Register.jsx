@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import "../styles/pages/register.css";
-import Footer from "../components/Footer";
 
 const Register = () => {
     const [name, setName] = useState("");
@@ -85,7 +84,6 @@ const Register = () => {
                 </div>
             </div>
         </div>
-        <Footer />
         </>
     );
 };

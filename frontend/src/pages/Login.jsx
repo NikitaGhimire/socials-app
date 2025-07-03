@@ -4,7 +4,6 @@ import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContex";
 import "../styles/pages/login.css";
-import Footer from '../components/Footer';
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -91,7 +90,6 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
         </>
     );
 };

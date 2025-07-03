@@ -5,7 +5,6 @@ import api from '../services/api';
 import '../styles/pages/home.css';
 
 const NavigationBar = lazy(() => import('../components/NavigationBar'));
-const Footer = lazy(() => import('../components/Footer'));
 const CreatePost = lazy(() => import('../components/CreatePost'));
 const UserProfile = lazy(() => import ('../components/UserProfile'));
 const FriendList = lazy(() => import ('../components/FriendList'));
@@ -764,7 +763,6 @@ const Home = () => {
 
                 
             </div>
-            <Footer />
         </Suspense>
     );
 };
