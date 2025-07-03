@@ -43,8 +43,11 @@ const sendMessage = async (req, res) => {
         });
 
         await message.save();
-        // Update the conversation with the latest message
+        
+        // Update the conversation with the latest message and timestamp
         conversation.latestMessage = message._id;
+        conversation.updatedAt = new Date();
+        await conversation.save();
         
         res.status(200).json({ message, conversation });
     } catch (error) {
@@ -60,14 +63,24 @@ const getConversations = async (req, res) => {
       .populate("participants", "name email profilePicture")
       .populate({
           path: "latestMessage",
-          populate: { path: "sender receiver", select: "name email profilePicture" }
-        });
-      // Check if conversations were found
-  if (!conversations || conversations.length === 0) {
+          select: "content createdAt sender",
+          populate: { path: "sender", select: "name" }
+        })
+      .sort({ updatedAt: -1 }); // Sort by most recent activity
+      
+    // Check if conversations were found
+    if (!conversations || conversations.length === 0) {
       return res.status(200).json([]);
     }
 
-    res.status(200).json(conversations);
+    // Format the response to include lastMessage content
+    const formattedConversations = conversations.map(conv => ({
+      ...conv.toObject(),
+      lastMessage: conv.latestMessage ? conv.latestMessage.content : null,
+      lastMessageTime: conv.latestMessage ? conv.latestMessage.createdAt : conv.updatedAt
+    }));
+
+    res.status(200).json(formattedConversations);
   } catch (error) {
     console.error("Error retrieving conversations:", error);
     res.status(500).json({ message: error.message });
