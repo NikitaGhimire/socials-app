@@ -9,9 +9,11 @@
     align-items: center;
     padding: 0 20px;
     height: 60px;
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    z-index: 9999;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Layout Sections */
@@ -30,37 +32,49 @@
 .search-container {
     display: flex;
     align-items: center;
-    background: #f0f2f5;
-    border-radius: 20px;
-    padding: 5px 15px;
+    background: rgba(240, 242, 245, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 8px 16px;
     width: 100%;
+    gap: 8px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.search-container:focus-within {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-icon {
+    color: #9ca3af;
+    transition: color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.search-container:focus-within .search-icon {
+    color: #667eea;
 }
 
 .nav-search-input {
     flex: 1;
     border: none;
     background: transparent;
-    padding: 8px;
+    padding: 8px 0;
     outline: none;
     font-size: 14px;
+    color: #374151;
 }
 
-.nav-search-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
+.nav-search-input::placeholder {
+    color: #9ca3af;
+    transition: color 0.3s ease;
 }
 
-.nav-search-button img {
-    width: 20px;
-    height: 20px;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-.nav-search-button:hover img {
-    opacity: 1;
+.search-container:focus-within .nav-search-input::placeholder {
+    color: #d1d5db;
 }
 
 /* Navigation Icons */
@@ -209,6 +223,18 @@
 @media screen and (max-width: 768px) {
     .navigation-bar {
         padding: 0 10px;
+        /* Ensure navbar stays visible on mobile browsers */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        /* Add safe area support for mobile browsers */
+        padding-top: env(safe-area-inset-top, 0);
+        height: calc(60px + env(safe-area-inset-top, 0));
+        /* Prevent browser UI from covering navbar */
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
     }
 
     .nav-left {
@@ -221,16 +247,18 @@
 
     .nav-right {
         position: fixed;
-        top: 60px;
+        top: calc(60px + env(safe-area-inset-top, 0));
         right: -250px;
         width: 250px;
-        height: calc(100vh - 60px);
-        background: white;
+        height: calc(100vh - 60px - env(safe-area-inset-top, 0));
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
         flex-direction: column;
         padding: 20px;
         box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
         transition: right 0.3s ease;
-        z-index: 999;
+        z-index: 9998;
+        border-left: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     .nav-right.show {
@@ -314,6 +342,21 @@
         font-size: 14px;
         font-weight: 500;
         color: #333;
+    }
+
+    .search-container {
+        padding: 6px 12px;
+        border-radius: 20px;
+    }
+
+    .nav-search-input {
+        font-size: 13px;
+        padding: 6px 0;
+    }
+
+    .search-icon {
+        width: 14px;
+        height: 14px;
     }
 }
 

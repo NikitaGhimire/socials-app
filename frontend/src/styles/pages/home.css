@@ -11,7 +11,7 @@
     flex-direction: column;
     min-height: 100vh;
     width: 100%;
-    padding-top: 60px;
+    padding-top: calc(60px + env(safe-area-inset-top, 0));
     margin: 0 auto;
     max-width: 1600px;
     padding-bottom: 60px;
@@ -224,6 +224,41 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Ensure proper viewport behavior on mobile */
+@supports (height: 100dvh) {
+    .home-container {
+        min-height: 100dvh;
+    }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    .navigation-bar {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        /* Fallback for older iOS */
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+}
+
+/* Additional mobile browser fixes */
+@media screen and (max-width: 768px) {
+    /* Prevent iOS bounce scroll from affecting navbar */
+    .navigation-bar {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+    
+    /* Ensure content doesn't get cut off */
+    .home-container {
+        padding-top: max(60px, calc(60px + env(safe-area-inset-top, 0)));
+        padding-bottom: max(60px, env(safe-area-inset-bottom, 0));
+    }
 }
 
 /* Responsive Design */
