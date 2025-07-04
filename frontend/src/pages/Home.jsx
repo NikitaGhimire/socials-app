@@ -213,6 +213,13 @@ const Home = () => {
                 return;
             }
 
+            // Check if users are still friends
+            const isStillFriends = friends.some(friend => friend._id === receiverId);
+            if (!isStillFriends) {
+                alert('You can no longer send messages to this user as you are not friends.');
+                return;
+            }
+
             const response = await api.post('/messages/sendMessage', {
                 conversation: conversationId,
                 receiverId,

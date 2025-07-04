@@ -101,6 +101,23 @@ const ChatWindow = ({
     textareaRef.current?.focus();
   };
 
+  // Check if current user is still friends with the other participant
+  const isStillFriends = (otherUserId) => {
+    return friends.some(friend => friend._id === otherUserId);
+  };
+
+  // Get the other participant in the conversation
+  const getOtherParticipantId = () => {
+    if (selectedConversation) {
+      const otherParticipant = getOtherParticipant(selectedConversation);
+      return otherParticipant?._id;
+    }
+    return selectedFriend;
+  };
+
+  const otherUserId = getOtherParticipantId();
+  const canSendMessages = otherUserId && isStillFriends(otherUserId);
+
   const isConversationOpen = selectedConversation || selectedFriend;
 
   return (
@@ -134,8 +151,18 @@ const ChatWindow = ({
                     {selectedConversation 
                       ? getOtherParticipant(selectedConversation)?.name 
                       : friends.find(f => f._id === selectedFriend)?.name}
+                    {!canSendMessages && (
+                      <span className="unfriended-badge" title="No longer friends">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        No longer friends
+                      </span>
+                    )}
                   </h3>
-                  <span className="online-status">Online</span>
+                  <span className="online-status">
+                    {canSendMessages ? 'Online' : 'Messaging disabled'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -206,10 +233,11 @@ const ChatWindow = ({
                     <div className="conversations-scroll">
                       {filteredConversations.map((conv) => {
                         const other = getOtherParticipant(conv);
+                        const stillFriends = isStillFriends(other?._id);
                         return (
                           <div
                             key={conv._id}
-                            className="conversation-item"
+                            className={`conversation-item ${!stillFriends ? 'unfriended' : ''}`}
                             onClick={() => {
                               setSelectedConversation(conv);
                               setSelectedFriend(null);
@@ -230,7 +258,16 @@ const ChatWindow = ({
                                 <div className="online-indicator"></div>
                               </div>
                               <div className="participant-details">
-                                <span className="participant-name">{other?.name}</span>
+                                <span className="participant-name">
+                                  {other?.name}
+                                  {!stillFriends && (
+                                    <span className="unfriended-indicator" title="No longer friends">
+                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                      </svg>
+                                    </span>
+                                  )}
+                                </span>
                                 <span className="last-message">
                                   {conv.lastMessage || 
                                    conv.latestMessage?.content || 
@@ -369,59 +406,89 @@ const ChatWindow = ({
                 </div>
 
                 <div className="message-input-container">
-                  <div className="input-wrapper">
-                    <textarea
-                      ref={textareaRef}
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type a message..."
-                      onKeyPress={handleKeyPress}
-                      className="message-input"
-                      rows="1"
-                      maxLength="1000"
-                    />
-                    <div className="input-actions">
-                      <div className="emoji-picker-container" ref={emojiPickerRef}>
-                        <button
-                          className="emoji-button"
-                          title="Add emoji"
-                          type="button"
-                          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        >
-                          😊
-                        </button>
-                        {showEmojiPicker && (
-                          <div className="emoji-picker-wrapper">
-                            <Suspense fallback={<div>Loading emojis...</div>}>
-                              <EmojiPicker
-                                onEmojiClick={onEmojiClick}
-                                width={300}
-                                height={400}
-                                searchDisabled={false}
-                                skinTonesDisabled={true}
-                                previewConfig={{
-                                  showPreview: false
-                                }}
-                              />
-                            </Suspense>
+                  {canSendMessages ? (
+                    <>
+                      <div className="input-wrapper">
+                        <textarea
+                          ref={textareaRef}
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          placeholder="Type a message..."
+                          onKeyPress={handleKeyPress}
+                          className="message-input"
+                          rows="1"
+                          maxLength="1000"
+                        />
+                        <div className="input-actions">
+                          <div className="emoji-picker-container" ref={emojiPickerRef}>
+                            <button
+                              className="emoji-button"
+                              title="Add emoji"
+                              type="button"
+                              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            >
+                              😊
+                            </button>
+                            {showEmojiPicker && (
+                              <div className="emoji-picker-wrapper">
+                                <Suspense fallback={<div>Loading emojis...</div>}>
+                                  <EmojiPicker
+                                    onEmojiClick={onEmojiClick}
+                                    width={300}
+                                    height={400}
+                                    searchDisabled={false}
+                                    skinTonesDisabled={true}
+                                    previewConfig={{
+                                      showPreview: false
+                                    }}
+                                  />
+                                </Suspense>
+                              </div>
+                            )}
                           </div>
-                        )}
+                          <button
+                            onClick={handleSendMessage}
+                            disabled={!newMessage.trim()}
+                            className="send-message-btn"
+                            title="Send message"
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                      <div className="typing-indicator">
+                        <span className="char-count">{newMessage.length}/1000</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="disabled-input-container">
+                      <div className="disabled-message">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" opacity="0.5">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        <span>You are no longer friends with this user and cannot send messages.</span>
                       </div>
                       <button
-                        onClick={handleSendMessage}
-                        disabled={!newMessage.trim()}
-                        className="send-message-btn"
-                        title="Send message"
+                        className="delete-conversation-action-btn"
+                        onClick={() => {
+                          if (window.confirm('Delete this conversation? This action cannot be undone.')) {
+                            if (selectedConversation) {
+                              deleteConversation(selectedConversation._id);
+                              handleBackToList();
+                            }
+                          }
+                        }}
+                        title="Delete conversation"
                       >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                         </svg>
+                        Delete Conversation
                       </button>
                     </div>
-                  </div>
-                  <div className="typing-indicator">
-                    <span className="char-count">{newMessage.length}/1000</span>
-                  </div>
+                  )}
                 </div>
               </div>
             )}

@@ -113,21 +113,26 @@
 .control-button {
   width: 36px;
   height: 36px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #374151;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .control-button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(255, 255, 255, 0.8);
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #1f2937;
 }
 
 /* ===== MAIN CONTAINER ===== */
@@ -271,6 +276,16 @@
   border-color: #e5e7eb;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.conversation-item.unfriended {
+  opacity: 0.7;
+  background: #fef9f3;
+  border-left: 3px solid #f59e0b;
+}
+
+.conversation-item.unfriended:hover {
+  background: #fef3cd;
 }
 
 .conversation-left {
@@ -456,6 +471,19 @@
 .modal-close-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
+}
+
+.close-button {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  color: #374151 !important;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  color: #1f2937 !important;
 }
 
 .modal-content {
@@ -794,6 +822,75 @@
   color: #9ca3af;
 }
 
+/* ===== DISABLED STATES ===== */
+.disabled-input-container {
+  padding: 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.disabled-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #fef3cd;
+  border: 1px solid #fbbf24;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 14px;
+}
+
+/* Unfriended User Styles */
+.conversation-item.unfriended {
+  opacity: 0.7;
+  background: #fef9f3;
+  border-left: 3px solid #f59e0b;
+}
+
+.conversation-item.unfriended:hover {
+  background: #fef3cd;
+}
+
+.unfriended-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  color: #d97706;
+  opacity: 0.8;
+}
+
+.unfriended-indicator svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Header Unfriended Badge */
+.unfriended-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fecaca;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.unfriended-badge svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0.8;
+}
+
 /* ===== ANIMATIONS ===== */
 @keyframes messageSlide {
   from {
@@ -834,28 +931,35 @@
     bottom: 0;
     right: 0;
     left: 0;
-    /* Ensure chat doesn't interfere with navbar */
-    z-index: 1000;
+    top: calc(80px + env(safe-area-inset-top, 20px));
+    /* Increased top margin to account for navbar and mobile browser bars */
+    z-index: 999;
+    /* Lower than navbar (1001) but higher than main content */
   }
   
   .chat-popup {
     width: 100%;
-    height: calc(100vh - env(safe-area-inset-top, 0));
+    height: calc(100vh - 80px - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 0));
     border-radius: 0;
-    max-height: calc(100vh - env(safe-area-inset-top, 0));
-    /* Account for navbar space */
-    margin-top: calc(60px + env(safe-area-inset-top, 0));
+    max-height: calc(100vh - 80px - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 0));
+    margin-top: 0;
+    position: relative;
   }
   
   .chat-header {
     border-radius: 0;
     padding: 16px 20px;
-    /* Make sure header is visible */
     position: sticky;
     top: 0;
-    z-index: 1001;
-    background: rgba(255, 255, 255, 0.98);
+    z-index: 1002;
+    /* Higher than navbar to ensure it's always accessible */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Restore gradient background for mobile */
     backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-height: 60px;
+    box-sizing: border-box;
   }
   
   .search-section {
@@ -864,9 +968,13 @@
   
   .messages-list {
     padding: 12px 16px;
+    padding-top: 0;
+    /* Remove top padding since header is sticky */
   }
   
   .message-input-container {
     padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+    /* Account for home indicator on iOS */
   }
 }

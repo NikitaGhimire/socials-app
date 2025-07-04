@@ -254,10 +254,17 @@
         user-select: none;
     }
     
-    /* Ensure content doesn't get cut off */
+    /* Ensure content doesn't get cut off and has space for chat window */
     .home-container {
-        padding-top: max(60px, calc(60px + env(safe-area-inset-top, 0)));
+        padding-top: max(80px, calc(80px + env(safe-area-inset-top, 20px)));
         padding-bottom: max(60px, env(safe-area-inset-bottom, 0));
+        /* Added extra padding top to accommodate improved navbar spacing */
+    }
+    
+    /* Adjust main content to leave space for chat window */
+    .main-content {
+        padding-bottom: 80px;
+        /* Extra bottom padding when chat window might be open */
     }
 }
 
